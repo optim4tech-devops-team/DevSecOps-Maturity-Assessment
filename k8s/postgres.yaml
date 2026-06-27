@@ -1,0 +1,71 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: assessment-postgres
+  namespace: assesment
+type: Opaque
+stringData:
+  POSTGRES_DB: assessment
+  POSTGRES_USER: assessment
+  POSTGRES_PASSWORD: assessment-pass-change-me
+  DATABASE_URL: postgres://assessment:assessment-pass-change-me@assessment-postgres:5432/assessment
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: assessment-postgres-data
+  namespace: assesment
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assessment-postgres
+  namespace: assesment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: assessment-postgres
+  template:
+    metadata:
+      labels:
+        app: assessment-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: assessment-postgres
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: assessment-postgres-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assessment-postgres
+  namespace: assesment
+spec:
+  selector:
+    app: assessment-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432

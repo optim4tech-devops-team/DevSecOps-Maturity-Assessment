@@ -1,0 +1,209 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: assessment-app-config
+  namespace: assesment
+data:
+  ADMIN_USERNAME: admin
+  LOCAL_AI_BASE_URL: http://ollama.local-ai.svc.cluster.local:11434
+  LOCAL_AI_MODEL: qwen3:4b
+  HOSTNAME: 0.0.0.0
+  PORT: "3000"
+  NEXT_PUBLIC_APP_URL: https://assesment.optim4tech.com
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: assessment-app-secret
+  namespace: assesment
+type: Opaque
+stringData:
+  ADMIN_PASSWORD: Optim4Tech@2026!
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: assessment-app-source
+  namespace: assesment
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assessment-app
+  namespace: assesment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: assessment-app
+  template:
+    metadata:
+      labels:
+        app: assessment-app
+    spec:
+      containers:
+        - name: app
+          image: node:22-alpine
+          imagePullPolicy: IfNotPresent
+          workingDir: /workspace/app
+          command:
+            - sh
+            - -c
+            - mkdir -p .next/standalone/.next && rm -rf .next/standalone/.next/static && cp -R .next/static .next/standalone/.next/static && if [ -d public ]; then rm -rf .next/standalone/public && cp -R public .next/standalone/public; fi && node .next/standalone/server.js
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: assessment-app-config
+            - secretRef:
+                name: assessment-app-secret
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: assessment-postgres
+                  key: DATABASE_URL
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          volumeMounts:
+            - name: app-source
+              mountPath: /workspace/app
+      volumes:
+        - name: app-source
+          persistentVolumeClaim:
+            claimName: assessment-app-source
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: assessment-backend
+  namespace: assesment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: assessment-backend
+  template:
+    metadata:
+      labels:
+        app: assessment-backend
+    spec:
+      containers:
+        - name: backend
+          image: node:22-alpine
+          imagePullPolicy: IfNotPresent
+          workingDir: /workspace/app
+          command:
+            - sh
+            - -c
+            - node backend/server.mjs
+          ports:
+            - containerPort: 3001
+          envFrom:
+            - configMapRef:
+                name: assessment-app-config
+            - secretRef:
+                name: assessment-app-secret
+          env:
+            - name: BACKEND_PORT
+              value: "3001"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: assessment-postgres
+                  key: DATABASE_URL
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3001
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3001
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          volumeMounts:
+            - name: app-source
+              mountPath: /workspace/app
+      volumes:
+        - name: app-source
+          persistentVolumeClaim:
+            claimName: assessment-app-source
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assessment-app
+  namespace: assesment
+spec:
+  selector:
+    app: assessment-app
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: assessment-backend
+  namespace: assesment
+spec:
+  selector:
+    app: assessment-backend
+  ports:
+    - name: http
+      port: 80
+      targetPort: 3001
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: assessment-app
+  namespace: assesment
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - assesment.optim4tech.com
+      secretName: assesment-optim4tech-com-tls
+  rules:
+    - host: assesment.optim4tech.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: assessment-backend
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: assessment-app
+                port:
+                  number: 80

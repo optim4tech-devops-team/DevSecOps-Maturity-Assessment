@@ -1,0 +1,1874 @@
+{
+  "categories": [
+    {
+      "id": "org",
+      "name": "Organizasyon ve Çalışma Modeli",
+      "weight": 7,
+      "description": "DevOps sahipliği, ekipler arası standartlar, rol netliği ve öğrenme kültürü."
+    },
+    {
+      "id": "sdlc",
+      "name": "SDLC ve Talep Yönetimi",
+      "weight": 8,
+      "description": "Talep toplama, analiz, önceliklendirme, DoR/DoD ve teslimat disiplini."
+    },
+    {
+      "id": "scm",
+      "name": "Kaynak Kod Yönetimi",
+      "weight": 8,
+      "description": "Repository standardı, branch stratejisi, PR, review, RBAC ve izlenebilirlik."
+    },
+    {
+      "id": "ci",
+      "name": "CI ve Build Yönetimi",
+      "weight": 9,
+      "description": "Pipeline as code, build standardı, test gate, artifact ve pipeline şablonları."
+    },
+    {
+      "id": "cd",
+      "name": "CD ve Deployment",
+      "weight": 10,
+      "description": "Ortam geçişi, deployment otomasyonu, production onayı, rollback ve release gate."
+    },
+    {
+      "id": "release",
+      "name": "Release ve Değişiklik Yönetimi",
+      "weight": 6,
+      "description": "Release planı, hotfix, değişiklik kaydı, sürüm notu ve iş onayı."
+    },
+    {
+      "id": "devsecops",
+      "name": "DevSecOps ve Güvenlik",
+      "weight": 12,
+      "description": "Kod kalitesi, SAST, DAST, SCA, secret, container, SBOM ve güvenlik aksiyon takibi."
+    },
+    {
+      "id": "test",
+      "name": "Test Otomasyonu",
+      "weight": 8,
+      "description": "Unit, API, UI, regresyon, load test, test verisi ve ortam hazırlığı."
+    },
+    {
+      "id": "architecture",
+      "name": "Mimari ve Entegrasyon",
+      "weight": 7,
+      "description": "Monolit/servis yapısı, API yönetimi, veri tutarlılığı, bağımlılık ve entegrasyon modeli."
+    },
+    {
+      "id": "infrastructure",
+      "name": "Altyapı ve Cloud Hazırlığı",
+      "weight": 6,
+      "description": "Yedeklilik, kapasite, IaC, cloud/on-prem stratejisi ve felaket kurtarma."
+    },
+    {
+      "id": "k8s",
+      "name": "Container ve Kubernetes",
+      "weight": 6,
+      "description": "Container standardı, GitOps, policy, quota, secret ve network kontrolleri."
+    },
+    {
+      "id": "observability",
+      "name": "İzleme, Log ve Gözlemlenebilirlik",
+      "weight": 8,
+      "description": "Monitoring, logging, tracing, health check, SLO, alarm ve hata takibi."
+    },
+    {
+      "id": "ops",
+      "name": "Operasyon ve Incident Yönetimi",
+      "weight": 6,
+      "description": "Incident, runbook, RCA, veritabanı rollback ve on-call pratikleri."
+    },
+    {
+      "id": "governance",
+      "name": "Yönetişim ve Uyumluluk",
+      "weight": 6,
+      "description": "Audit evidence, RBAC, segregation of duties, policy ve uyumluluk raporlama."
+    },
+    {
+      "id": "platform",
+      "name": "Platform Engineering",
+      "weight": 5,
+      "description": "Self-service, golden path, developer portal ve ortak platform kabiliyetleri."
+    }
+  ],
+  "questions": [
+    {
+      "id": "org_app_count",
+      "code": "ORG-PORT-001",
+      "categoryId": "org",
+      "text": "Uygulama portföyü ve assessment kapsamı kurumda nasıl görünür hale getiriliyor?",
+      "type": "single",
+      "weight": 3,
+      "required": true,
+      "options": [
+        {
+          "label": "Kapsam çoğunlukla görüşmeler ve ekip bilgisiyle çıkarılıyor",
+          "value": "tribal",
+          "score": 1
+        },
+        {
+          "label": "Bazı uygulama listeleri var fakat güncellik ve sahiplik net değil",
+          "value": "partial_inventory",
+          "score": 2
+        },
+        {
+          "label": "Uygulama envanteri var; temel sahiplik ve teknoloji bilgisi tutuluyor",
+          "value": "basic_inventory",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde sahiplik, ortam, entegrasyon ve operasyon bilgisi güncel tutuluyor",
+          "value": "critical_inventory",
+          "score": 4
+        },
+        {
+          "label": "Portföy envanteri CMDB, deployment, monitoring ve risk verileriyle sürekli güncelleniyor",
+          "value": "managed_portfolio",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "org_critical_app_count",
+      "code": "ORG-CRIT-001",
+      "categoryId": "org",
+      "text": "Uygulamaların iş kritiklik, müşteri etkisi ve operasyon riski nasıl sınıflandırılıyor?",
+      "type": "single",
+      "weight": 3,
+      "required": true,
+      "options": [
+        {
+          "label": "Kritiklik sınıflandırması net değil; öncelik duruma göre belirleniyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Bazı kritik sistemler biliniyor fakat kriterler yazılı ve tutarlı değil",
+          "value": "known_informal",
+          "score": 2
+        },
+        {
+          "label": "İş kritikliği için temel kriterler var; bazı ekiplerde uygulanıyor",
+          "value": "criteria_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik uygulamalar etki, SLA, veri ve bağımlılık kriterleriyle düzenli sınıflandırılıyor",
+          "value": "critical_classified",
+          "score": 4
+        },
+        {
+          "label": "Kritiklik sınıfları SLO, release gate, güvenlik önceliği ve DR hedeflerine doğrudan bağlı",
+          "value": "risk_managed",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "org_devops_ownership",
+      "code": "ORG-OWN-001",
+      "categoryId": "org",
+      "text": "DevOps ve DevSecOps pratiklerinin sahipliği kurumda nasıl konumlanıyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Belirgin bir sahiplik yok; pratikler kişisel inisiyatifle yürütülüyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Ekip bazında sahipler var fakat kurum geneli standart oluşmamış",
+          "value": "team_local",
+          "score": 2
+        },
+        {
+          "label": "Merkezi sorumluluk var; standartlar bazı ekiplerde uygulanıyor",
+          "value": "central_partial",
+          "score": 3
+        },
+        {
+          "label": "Platform veya enablement ekibi kritik ürünlerde aktif sahiplik alıyor",
+          "value": "platform_critical",
+          "score": 4
+        },
+        {
+          "label": "Kurumsal sahiplik, ölçüm, eğitim ve sürekli iyileştirme döngüsü işletiliyor",
+          "value": "governed_optimized",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "sdlc_demand_channel",
+      "code": "SDLC-REQ-001",
+      "categoryId": "sdlc",
+      "text": "İş talepleri ve geliştirme ihtiyaçları hangi kanalda izleniyor?",
+      "type": "tool",
+      "weight": 2,
+      "required": true,
+      "options": [
+        {
+          "label": "Yok",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Jira",
+          "value": "jira",
+          "score": 4
+        },
+        {
+          "label": "Azure Boards",
+          "value": "azure_boards",
+          "score": 4
+        },
+        {
+          "label": "ServiceNow",
+          "value": "servicenow",
+          "score": 3
+        },
+        {
+          "label": "GitHub Issues",
+          "value": "github_issues",
+          "score": 3
+        },
+        {
+          "label": "GitLab Issues",
+          "value": "gitlab_issues",
+          "score": 3
+        },
+        {
+          "label": "Kuruma özel portal",
+          "value": "custom_portal",
+          "score": 4
+        },
+        {
+          "label": "Diğer",
+          "value": "other",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "id": "sdlc_intake_standard",
+      "code": "SDLC-REQ-002",
+      "categoryId": "sdlc",
+      "text": "Talep alma ve analiz formatı ekipler arasında ne kadar standart?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Her ekip kendi yöntemini kullanıyor; zorunlu alan yok",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Temel açıklama alanları var fakat kalite kişiye bağlı",
+          "value": "basic",
+          "score": 2
+        },
+        {
+          "label": "Standart şablon var; iş değeri ve kabul kriteri kısmen isteniyor",
+          "value": "template_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik taleplerde kabul kriteri, etki ve bağımlılıklar zorunlu",
+          "value": "critical_required",
+          "score": 4
+        },
+        {
+          "label": "Talep kalitesi ölçülüyor; eksik kayıtlar akışa alınmadan geri döndürülüyor",
+          "value": "quality_gate",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "sdlc_dor_dod",
+      "code": "SDLC-READY-DONE-001",
+      "categoryId": "sdlc",
+      "text": "Definition of Ready ve Definition of Done pratikleri nasıl uygulanıyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Tanımlı değil; işin hazır veya tamam olma kriteri sözlü ilerliyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Ekip bazlı kontrol listeleri var fakat zorunlu değil",
+          "value": "team_checklist",
+          "score": 2
+        },
+        {
+          "label": "Standart kriterler var; bazı board veya ürünlerde kullanılıyor",
+          "value": "defined_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde DoR/DoD gate olarak uygulanıyor",
+          "value": "critical_gate",
+          "score": 4
+        },
+        {
+          "label": "DoR/DoD kalite, test, güvenlik ve dokümantasyon metrikleriyle ölçülüyor",
+          "value": "measured",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "scm_tooling",
+      "code": "SCM-TOOL-001",
+      "categoryId": "scm",
+      "text": "Kaynak kod ve repository yönetimi için hangi araçlar kullanılıyor?",
+      "type": "tool",
+      "weight": 2,
+      "required": true,
+      "options": [
+        {
+          "label": "Yok",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Azure DevOps Git",
+          "value": "azure_devops_git",
+          "score": 4
+        },
+        {
+          "label": "GitHub",
+          "value": "github",
+          "score": 4
+        },
+        {
+          "label": "GitLab",
+          "value": "gitlab",
+          "score": 4
+        },
+        {
+          "label": "Bitbucket",
+          "value": "bitbucket",
+          "score": 3
+        },
+        {
+          "label": "SVN",
+          "value": "svn",
+          "score": 1
+        },
+        {
+          "label": "TFVC",
+          "value": "tfvc",
+          "score": 1
+        },
+        {
+          "label": "Diğer",
+          "value": "other",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "id": "scm_branch_strategy",
+      "code": "SCM-BRANCH-001",
+      "categoryId": "scm",
+      "text": "Branch stratejisi ve merge modeli ekipler arasında nasıl yönetiliyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Ortak branch stratejisi yok",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Ekip bazlı branch kuralları var fakat denetlenmiyor",
+          "value": "team_local",
+          "score": 2
+        },
+        {
+          "label": "GitFlow veya trunk tabanlı model bazı ürünlerde tanımlı",
+          "value": "defined_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde branch protection ve merge kuralları uygulanıyor",
+          "value": "protected_critical",
+          "score": 4
+        },
+        {
+          "label": "Branch stratejisi policy, test ve güvenlik gate'leriyle otomatik korunuyor",
+          "value": "policy_enforced",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "scm_pr_policy",
+      "code": "SCM-PR-001",
+      "categoryId": "scm",
+      "text": "Pull Request, review ve merge öncesi kontrol modeli nasıl işletiliyor?",
+      "type": "single",
+      "weight": 5,
+      "required": true,
+      "options": [
+        {
+          "label": "PR zorunlu değil veya doğrudan commit yaygın",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "PR açılıyor fakat reviewer ve kontrol standardı yok",
+          "value": "informal",
+          "score": 2
+        },
+        {
+          "label": "Minimum reviewer ve temel status check bazı repo'larda kullanılıyor",
+          "value": "partial_policy",
+          "score": 3
+        },
+        {
+          "label": "Kritik repo'larda reviewer, build ve test kontrolleri zorunlu",
+          "value": "critical_policy",
+          "score": 4
+        },
+        {
+          "label": "Risk bazlı approver, CODEOWNERS ve quality gate'ler otomatik uygulanıyor",
+          "value": "risk_policy",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "ci_pipeline_as_code",
+      "code": "CI-PAC-001",
+      "categoryId": "ci",
+      "text": "Build ve doğrulama süreçleri pipeline as code yaklaşımıyla ne kadar standart?",
+      "type": "single",
+      "weight": 5,
+      "required": true,
+      "options": [
+        {
+          "label": "Build işlemleri manuel veya kişisel scriptlerle ilerliyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Bazı projelerde script var; merkezi pipeline standardı yok",
+          "value": "script_partial",
+          "score": 2
+        },
+        {
+          "label": "YAML veya benzeri pipeline tanımları temel seviyede kullanılıyor",
+          "value": "yaml_basic",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde reusable pipeline şablonları uygulanıyor",
+          "value": "templates_critical",
+          "score": 4
+        },
+        {
+          "label": "Pipeline standardı merkezi kütüphane, versiyonlama ve policy ile yönetiliyor",
+          "value": "managed_templates",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "ci_unit_quality_gate",
+      "code": "CI-TEST-001",
+      "categoryId": "ci",
+      "text": "Unit test, coverage ve kalite kontrolleri merge/build sürecinde nasıl uygulanıyor?",
+      "type": "single",
+      "weight": 5,
+      "required": true,
+      "options": [
+        {
+          "label": "Unit test veya coverage hedefi yok",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Bazı geliştiriciler test yazıyor; pipeline zorunluluğu yok",
+          "value": "developer_optional",
+          "score": 2
+        },
+        {
+          "label": "Testler bazı repo'larda pipeline içinde çalışıyor",
+          "value": "partial_pipeline",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde test ve minimum coverage gate zorunlu",
+          "value": "critical_gate",
+          "score": 4
+        },
+        {
+          "label": "Coverage, kalite trendi ve flaky test yönetimi düzenli ölçülüyor",
+          "value": "measured",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "ci_artifact_versioning",
+      "code": "CI-ART-001",
+      "categoryId": "ci",
+      "text": "Artifact üretimi, versiyonlama ve saklama standardı nasıl yönetiliyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Artifact çıktıları standart bir depoda tutulmuyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Paketler manuel isimlendirme veya klasör yapısıyla saklanıyor",
+          "value": "manual",
+          "score": 2
+        },
+        {
+          "label": "Artifact repository ve temel versiyonlama bazı projelerde var",
+          "value": "repo_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde immutable artifact ve release tag kullanılıyor",
+          "value": "immutable_critical",
+          "score": 4
+        },
+        {
+          "label": "Artifact, commit, build, test ve deploy izlenebilirliği uçtan uca kurulmuş",
+          "value": "traceable",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "cd_deployment_automation",
+      "code": "CD-AUTO-001",
+      "categoryId": "cd",
+      "text": "Uygulama deployment işlemleri hangi seviyede otomatikleştirilmiş?",
+      "type": "single",
+      "weight": 5,
+      "required": true,
+      "options": [
+        {
+          "label": "Deployment manuel adımlarla ve kişi bilgisine bağlı yapılıyor",
+          "value": "manual",
+          "score": 0
+        },
+        {
+          "label": "Bazı scriptler var fakat standart pipeline akışı yok",
+          "value": "script_partial",
+          "score": 2
+        },
+        {
+          "label": "Test veya staging ortamlarına pipeline ile deployment yapılabiliyor",
+          "value": "nonprod_pipeline",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde ortam geçişi pipeline üzerinden ve kayıtlı ilerliyor",
+          "value": "critical_pipeline",
+          "score": 4
+        },
+        {
+          "label": "Deployment otomasyonu onay, gate, rollback ve audit trail ile uçtan uca yönetiliyor",
+          "value": "managed_cd",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "cd_environment_promotion",
+      "code": "CD-ENV-001",
+      "categoryId": "cd",
+      "text": "Hangi ortamlara standart deployment veya promotion akışı işletiliyor?",
+      "type": "multi",
+      "weight": 3,
+      "required": true,
+      "options": [
+        {
+          "label": "Yok",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "DEV",
+          "value": "dev",
+          "score": 1
+        },
+        {
+          "label": "TEST",
+          "value": "test",
+          "score": 2
+        },
+        {
+          "label": "UAT",
+          "value": "uat",
+          "score": 3
+        },
+        {
+          "label": "PREPROD",
+          "value": "preprod",
+          "score": 4
+        },
+        {
+          "label": "PROD",
+          "value": "prod",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "cd_prod_approval",
+      "code": "CD-APR-001",
+      "categoryId": "cd",
+      "text": "Production geçişlerinde onay, yetki ve izlenebilirlik nasıl sağlanıyor?",
+      "type": "single",
+      "weight": 5,
+      "required": true,
+      "options": [
+        {
+          "label": "Onay mekanizması yok veya sözlü ilerliyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Manuel kayıt açılıyor; pipeline ile bağlantısı zayıf",
+          "value": "manual_record",
+          "score": 2
+        },
+        {
+          "label": "ITSM veya proje kaydı üzerinden onay var",
+          "value": "ticket_approval",
+          "score": 3
+        },
+        {
+          "label": "Pipeline approval ve görev ayrımı kritik ürünlerde uygulanıyor",
+          "value": "pipeline_approval",
+          "score": 4
+        },
+        {
+          "label": "Risk bazlı onay, change kaydı, evidence ve otomatik gate birlikte çalışıyor",
+          "value": "risk_gate",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "cd_rollback",
+      "code": "CD-RB-001",
+      "categoryId": "cd",
+      "text": "Uygulama ve veritabanı değişiklikleri için rollback pratiği hangi seviyede?",
+      "type": "single",
+      "weight": 5,
+      "required": true,
+      "options": [
+        {
+          "label": "Rollback planı yok; geri dönüş kişi tecrübesine bağlı",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Uygulama tarafında manuel geri dönüş adımları biliniyor",
+          "value": "manual_app",
+          "score": 2
+        },
+        {
+          "label": "Uygulama rollback dokümante; veritabanı tarafı sınırlı",
+          "value": "documented_app",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde uygulama ve veritabanı rollback runbook'ları test ediliyor",
+          "value": "critical_tested",
+          "score": 4
+        },
+        {
+          "label": "Rollback otomasyonu, tatbikat ve başarı metriği release sürecine bağlı",
+          "value": "automated_measured",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "release_calendar",
+      "code": "REL-CAL-001",
+      "categoryId": "release",
+      "text": "Release planı, takvim ve kapsam yönetimi ekipler arasında nasıl yürütülüyor?",
+      "type": "single",
+      "weight": 3,
+      "required": true,
+      "options": [
+        {
+          "label": "Release tarihleri ve kapsamı anlık kararla belirleniyor",
+          "value": "ad_hoc",
+          "score": 1
+        },
+        {
+          "label": "Ekip bazlı plan var fakat kurum geneli görünürlük sınırlı",
+          "value": "team_plan",
+          "score": 2
+        },
+        {
+          "label": "Ortak release takvimi bazı ürünlerde kullanılıyor",
+          "value": "shared_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde release kapsamı, risk ve onaylar önceden yönetiliyor",
+          "value": "critical_managed",
+          "score": 4
+        },
+        {
+          "label": "Release yönetimi portföy, change ve deployment metrikleriyle entegre",
+          "value": "portfolio_integrated",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "release_hotfix",
+      "code": "REL-HF-001",
+      "categoryId": "release",
+      "text": "Acil hata/hotfix akışı nasıl kontrol ediliyor?",
+      "type": "single",
+      "weight": 3,
+      "required": true,
+      "options": [
+        {
+          "label": "Hotfix süreci standart değil; hızlı çözüm kişilere bağlı",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Temel hotfix adımları biliniyor fakat kayıt ve test standardı zayıf",
+          "value": "basic",
+          "score": 2
+        },
+        {
+          "label": "Hotfix için ayrı kayıt, branch ve onay modeli bazı ürünlerde var",
+          "value": "defined_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde hotfix akışı test, onay ve rollback ile standart",
+          "value": "critical_standard",
+          "score": 4
+        },
+        {
+          "label": "Hotfix sonrası RCA ve kalıcı aksiyon backlog'u zorunlu işletiliyor",
+          "value": "learning_loop",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "release_notes",
+      "code": "REL-NOTE-001",
+      "categoryId": "release",
+      "text": "Release notu, teknik değişiklik özeti ve iş etkisi nasıl paylaşılıyor?",
+      "type": "single",
+      "weight": 2,
+      "required": true,
+      "options": [
+        {
+          "label": "Düzenli release notu hazırlanmıyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Manuel özetler hazırlanıyor; kapsam ve format değişken",
+          "value": "manual",
+          "score": 2
+        },
+        {
+          "label": "Standart format var; bazı ürünlerde düzenli kullanılıyor",
+          "value": "template_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde release notu, risk ve geri dönüş bilgisi zorunlu",
+          "value": "critical_required",
+          "score": 4
+        },
+        {
+          "label": "Release notu commit, work item, test ve deployment kayıtlarından otomatik üretiliyor",
+          "value": "automated",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "sec_sast_gate",
+      "code": "SEC-SAST-002",
+      "categoryId": "devsecops",
+      "text": "SAST bulguları PR, build veya release kararını nasıl etkiliyor?",
+      "type": "single",
+      "weight": 5,
+      "required": true,
+      "options": [
+        {
+          "label": "Tarama yok veya sonuçlar karar sürecine girmiyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Sonuçlar manuel inceleniyor; bloklayıcı değil",
+          "value": "manual_review",
+          "score": 2
+        },
+        {
+          "label": "Bazı projelerde quality gate uygulanıyor",
+          "value": "partial_gate",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde yüksek riskli bulgular merge/release engeli",
+          "value": "critical_blocking",
+          "score": 4
+        },
+        {
+          "label": "Risk eşiği, exception, SLA ve remediation takibi otomatik yönetiliyor",
+          "value": "managed_risk",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "sec_dast_tool",
+      "code": "SEC-DAST-001",
+      "categoryId": "devsecops",
+      "text": "DAST veya runtime güvenlik testi hangi kapsamda uygulanıyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "DAST uygulanmıyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Manuel veya dönemsel dış tarama yapılıyor",
+          "value": "manual_periodic",
+          "score": 2
+        },
+        {
+          "label": "Test ortamında bazı web/API uygulamaları taranıyor",
+          "value": "partial_test",
+          "score": 3
+        },
+        {
+          "label": "Kritik uygulamalarda release öncesi otomatik DAST var",
+          "value": "critical_release",
+          "score": 4
+        },
+        {
+          "label": "DAST, API envanteri, risk eşiği ve remediation SLA ile entegre",
+          "value": "managed",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "sec_sca_tool",
+      "code": "SEC-SCA-001",
+      "categoryId": "devsecops",
+      "text": "Açık kaynak bağımlılıkları, CVE ve lisans riskleri nasıl yönetiliyor?",
+      "type": "single",
+      "weight": 5,
+      "required": true,
+      "options": [
+        {
+          "label": "Dependency ve lisans riski sistematik izlenmiyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Geliştiriciler manuel güncelleme veya kontrol yapıyor",
+          "value": "manual",
+          "score": 2
+        },
+        {
+          "label": "Bazı projelerde SCA veya otomatik dependency uyarıları var",
+          "value": "partial_sca",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde CVE eşiği ve remediation takibi zorunlu",
+          "value": "critical_sla",
+          "score": 4
+        },
+        {
+          "label": "CVE, lisans, exception ve fix SLA akışı release gate'e bağlı",
+          "value": "managed_gate",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "sec_secret_scan",
+      "code": "SEC-SECRET-001",
+      "categoryId": "devsecops",
+      "text": "Repository, pipeline ve artifact alanlarında secret sızıntısı nasıl engelleniyor?",
+      "type": "single",
+      "weight": 5,
+      "required": true,
+      "options": [
+        {
+          "label": "Secret taraması veya merkezi secret standardı yok",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Manuel review ile tespit edilmeye çalışılıyor",
+          "value": "manual_review",
+          "score": 1
+        },
+        {
+          "label": "Bazı repo'larda secret scanning çalışıyor",
+          "value": "partial_scan",
+          "score": 3
+        },
+        {
+          "label": "Kritik repo ve pipeline'larda secret scan bloklayıcı",
+          "value": "critical_blocking",
+          "score": 4
+        },
+        {
+          "label": "Secret lifecycle, rotation, vault entegrasyonu ve incident akışı birlikte yönetiliyor",
+          "value": "managed",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "test_strategy",
+      "code": "TEST-STR-001",
+      "categoryId": "test",
+      "text": "Test stratejisi ekipler ve uygulama tipleri arasında nasıl standartlaştırılmış?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Test yaklaşımı kişisel veya ekip alışkanlığına göre değişiyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Manuel test ağırlıklı; kapsam dokümantasyonu sınırlı",
+          "value": "manual",
+          "score": 2
+        },
+        {
+          "label": "Temel test türleri ve sorumluluklar bazı ürünlerde tanımlı",
+          "value": "defined_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde test piramidi, regresyon ve kabul kriterleri standart",
+          "value": "critical_standard",
+          "score": 4
+        },
+        {
+          "label": "Test stratejisi risk, coverage, defect leakage ve release gate ile ölçülüyor",
+          "value": "measured",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "test_api_automation",
+      "code": "TEST-API-001",
+      "categoryId": "test",
+      "text": "API ve entegrasyon testleri ne kadar otomatik ve pipeline'a bağlı?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "API testleri manuel veya hiç yapılmıyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Bazı koleksiyonlar var fakat pipeline'a bağlı değil",
+          "value": "collections",
+          "score": 2
+        },
+        {
+          "label": "Bazı servislerde otomatik API testleri pipeline'da çalışıyor",
+          "value": "partial_pipeline",
+          "score": 3
+        },
+        {
+          "label": "Kritik servislerde contract/API test gate zorunlu",
+          "value": "critical_gate",
+          "score": 4
+        },
+        {
+          "label": "API testleri mock, contract, test data ve environment provisioning ile yönetiliyor",
+          "value": "managed",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "test_load_performance",
+      "code": "TEST-PERF-001",
+      "categoryId": "test",
+      "text": "Load, performans ve kapasite testleri hangi tetikleyicilerle yapılıyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Performans testi yapılmıyor veya yalnızca sorun çıkınca yapılıyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Dönemsel manuel testler var; senaryo standardı sınırlı",
+          "value": "manual_periodic",
+          "score": 2
+        },
+        {
+          "label": "Bazı kritik akışlar için load test senaryoları mevcut",
+          "value": "scenario_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik release'lerde performans eşiği ve test raporu zorunlu",
+          "value": "critical_gate",
+          "score": 4
+        },
+        {
+          "label": "Kapasite, trend, SLO ve performans budget kararları test sonuçlarına bağlı",
+          "value": "managed",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "architecture_topology",
+      "code": "ARCH-TOPO-001",
+      "categoryId": "architecture",
+      "text": "Uygulama mimarisi, servis ayrımı ve deployment bağımsızlığı hangi seviyede?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Tekil/monolitik yapı ve ortak runtime bağımlılıkları baskın",
+          "value": "monolith_coupled",
+          "score": 1
+        },
+        {
+          "label": "Bazı modüller ayrılmış fakat deployment bağımlılığı sürüyor",
+          "value": "modular_partial",
+          "score": 2
+        },
+        {
+          "label": "Servis ayrımı var; kritik bağımlılıklar dokümante değil",
+          "value": "services_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik servislerde bağımsız deploy, contract ve sahiplik modeli var",
+          "value": "independent_critical",
+          "score": 4
+        },
+        {
+          "label": "Mimari kararlar, bağımlılık haritası ve runtime metrikleri sürekli yönetiliyor",
+          "value": "managed_architecture",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "architecture_api_gateway",
+      "code": "ARCH-API-001",
+      "categoryId": "architecture",
+      "text": "İç ve dış servis çağrıları merkezi API yönetimiyle ne kadar kontrol ediliyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Uygulamalar hedef sistemlere doğrudan ve dağınık şekilde bağlanıyor",
+          "value": "direct_coupled",
+          "score": 0
+        },
+        {
+          "label": "Bazı proxy veya ara katmanlar var fakat merkezi standart yok",
+          "value": "proxy_partial",
+          "score": 2
+        },
+        {
+          "label": "API Gateway veya servis yönetimi bazı akışlarda kullanılıyor",
+          "value": "gateway_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik API'lerde kimlik doğrulama, rate limit ve loglama merkezi",
+          "value": "critical_gateway",
+          "score": 4
+        },
+        {
+          "label": "API ürünleşme, versiyonlama, policy ve tüketici analitiği birlikte yönetiliyor",
+          "value": "managed_api",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "architecture_data_consistency",
+      "code": "ARCH-DATA-001",
+      "categoryId": "architecture",
+      "text": "Veri tutarlılığı, şema farkları ve sistemler arası senkronizasyon riski nasıl yönetiliyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Senkronizasyon ve şema farkları manuel operasyonla yönetiliyor",
+          "value": "manual",
+          "score": 0
+        },
+        {
+          "label": "Bilinen veri farkları var; kontrol ve uyarı sınırlı",
+          "value": "known_risks",
+          "score": 2
+        },
+        {
+          "label": "Bazı entegrasyonlarda tutarlılık kontrolü ve hata kaydı var",
+          "value": "partial_control",
+          "score": 3
+        },
+        {
+          "label": "Kritik veri akışlarında idempotency, retry ve reconciliation uygulanıyor",
+          "value": "critical_controls",
+          "score": 4
+        },
+        {
+          "label": "Veri sözleşmeleri, kalite metrikleri ve otomatik düzeltme/uyarı mekanizmaları var",
+          "value": "managed_data",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "infra_availability",
+      "code": "INF-HA-001",
+      "categoryId": "infrastructure",
+      "text": "Yüksek erişilebilirlik, yedeklilik ve kapasite yaklaşımı nasıl tasarlanmış?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Yedeklilik ve kapasite ihtiyaçları sistem bazında net değil",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Kritik bileşenlerde manuel yedeklilik var",
+          "value": "manual_redundancy",
+          "score": 2
+        },
+        {
+          "label": "Temel HA tasarımı var; kapasite planlama dönemsel",
+          "value": "ha_basic",
+          "score": 3
+        },
+        {
+          "label": "Kritik sistemlerde HA, kapasite ve failover testleri düzenli",
+          "value": "critical_tested",
+          "score": 4
+        },
+        {
+          "label": "SLO, kapasite trendi, DR tatbikatı ve maliyet optimizasyonu birlikte yönetiliyor",
+          "value": "managed",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "infra_backup_dr",
+      "code": "INF-DR-001",
+      "categoryId": "infrastructure",
+      "text": "Backup, restore ve felaket kurtarma kabiliyeti hangi seviyede kanıtlanıyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Backup varlığı veya restore başarısı düzenli kanıtlanmıyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Backup alınıyor; restore testi sınırlı veya manuel",
+          "value": "backup_only",
+          "score": 2
+        },
+        {
+          "label": "Kritik sistemlerde restore testi dönemsel yapılıyor",
+          "value": "restore_partial",
+          "score": 3
+        },
+        {
+          "label": "RTO/RPO hedefleri ve DR runbook'ları kritik sistemlerde test ediliyor",
+          "value": "critical_dr",
+          "score": 4
+        },
+        {
+          "label": "DR tatbikatı, evidence, RTO/RPO sapması ve iyileştirme aksiyonu düzenli yönetiliyor",
+          "value": "managed_dr",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "infra_iac",
+      "code": "INF-IAC-001",
+      "categoryId": "infrastructure",
+      "text": "Altyapı kurulum ve değişiklikleri ne kadar kod ve onay akışıyla yönetiliyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Altyapı değişiklikleri manuel konsol veya ticket ile yapılıyor",
+          "value": "manual",
+          "score": 0
+        },
+        {
+          "label": "Bazı scriptler var; versiyonlama ve review sınırlı",
+          "value": "script_partial",
+          "score": 2
+        },
+        {
+          "label": "Bazı kaynaklar IaC ile yönetiliyor",
+          "value": "iac_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik altyapı değişiklikleri IaC, PR ve plan review ile ilerliyor",
+          "value": "critical_iac",
+          "score": 4
+        },
+        {
+          "label": "IaC modülleri policy, drift detection ve otomatik compliance kontrolüyle yönetiliyor",
+          "value": "managed_iac",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "k8s_container_standard",
+      "code": "K8S-CONTAINER-001",
+      "categoryId": "k8s",
+      "text": "Container image, registry, deployment manifest ve runtime standardı hangi seviyede?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Container standardı yok veya ekip bazında değişiyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Temel Dockerfile ve registry kullanımı var",
+          "value": "basic",
+          "score": 2
+        },
+        {
+          "label": "Bazı ürünlerde standart image ve deployment şablonu kullanılıyor",
+          "value": "template_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde approved base image, resource ve probe standartları var",
+          "value": "critical_standard",
+          "score": 4
+        },
+        {
+          "label": "Image, manifest, runtime policy ve provenance uçtan uca otomasyonla korunuyor",
+          "value": "managed",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "k8s_gitops",
+      "code": "K8S-GITOPS-001",
+      "categoryId": "k8s",
+      "text": "Kubernetes deployment değişiklikleri GitOps veya benzeri deklaratif modelle yönetiliyor mu?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Cluster değişiklikleri manuel komut veya dashboard üzerinden yapılıyor",
+          "value": "manual",
+          "score": 0
+        },
+        {
+          "label": "Manifestler repoda var fakat apply süreci manuel",
+          "value": "repo_manual",
+          "score": 2
+        },
+        {
+          "label": "Bazı namespace veya ürünlerde GitOps çalışıyor",
+          "value": "partial_gitops",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde GitOps, review ve ortam ayrımı standart",
+          "value": "critical_gitops",
+          "score": 4
+        },
+        {
+          "label": "GitOps drift, policy, secret ve promotion akışlarıyla uçtan uca yönetiliyor",
+          "value": "managed_gitops",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "k8s_policy_admission",
+      "code": "K8S-POLICY-001",
+      "categoryId": "k8s",
+      "text": "Admission control, policy as code ve namespace güvenlik kontrolleri nasıl uygulanıyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Admission policy veya namespace standardı yok",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Bazı manuel checklist veya cluster standardı var",
+          "value": "manual_check",
+          "score": 2
+        },
+        {
+          "label": "Temel policy kontrolleri bazı namespace'lerde uygulanıyor",
+          "value": "partial_policy",
+          "score": 3
+        },
+        {
+          "label": "Kritik namespace'lerde resource, security context ve image policy zorunlu",
+          "value": "critical_policy",
+          "score": 4
+        },
+        {
+          "label": "Policy as code, exception, audit ve remediation süreci merkezi yönetiliyor",
+          "value": "managed_policy",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "obs_monitoring",
+      "code": "OBS-MON-001",
+      "categoryId": "observability",
+      "text": "Uygulama ve altyapı metrikleri hangi araç ve standartlarla izleniyor?",
+      "type": "tool",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Yok",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Prometheus",
+          "value": "prometheus",
+          "score": 4
+        },
+        {
+          "label": "Grafana",
+          "value": "grafana",
+          "score": 4
+        },
+        {
+          "label": "Datadog",
+          "value": "datadog",
+          "score": 4
+        },
+        {
+          "label": "Dynatrace",
+          "value": "dynatrace",
+          "score": 4
+        },
+        {
+          "label": "New Relic",
+          "value": "newrelic",
+          "score": 4
+        },
+        {
+          "label": "Zabbix",
+          "value": "zabbix",
+          "score": 3
+        },
+        {
+          "label": "Diğer",
+          "value": "other",
+          "score": 2
+        }
+      ]
+    },
+    {
+      "id": "obs_logging",
+      "code": "OBS-LOG-001",
+      "categoryId": "observability",
+      "text": "Log toplama, arama, korelasyon ve saklama pratiği nasıl işletiliyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Loglar sunucu veya uygulama içinde dağınık tutuluyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Bazı loglar merkezi toplanıyor; format ve retention standart değil",
+          "value": "partial_collect",
+          "score": 2
+        },
+        {
+          "label": "Merkezi log arama var; kritik alanlarda korelasyon sınırlı",
+          "value": "central_basic",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde standart log formatı, retention ve dashboard var",
+          "value": "critical_standard",
+          "score": 4
+        },
+        {
+          "label": "Loglar trace, alarm, security event ve RCA süreçleriyle entegre",
+          "value": "managed",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "obs_tracing",
+      "code": "OBS-TRACE-001",
+      "categoryId": "observability",
+      "text": "Dağıtık transaction izleme ve servis bağımlılığı görünürlüğü hangi seviyede?",
+      "type": "single",
+      "weight": 3,
+      "required": true,
+      "options": [
+        {
+          "label": "Trace veya transaction bazlı görünürlük yok",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Bazı uygulamalarda manuel correlation id kullanılıyor",
+          "value": "manual_correlation",
+          "score": 2
+        },
+        {
+          "label": "Bazı kritik akışlarda tracing veya APM verisi var",
+          "value": "partial_apm",
+          "score": 3
+        },
+        {
+          "label": "Kritik servislerde trace, latency ve dependency dashboard'ları kullanılıyor",
+          "value": "critical_trace",
+          "score": 4
+        },
+        {
+          "label": "Tracing, SLO, RCA, capacity ve mimari bağımlılık analiziyle birlikte yönetiliyor",
+          "value": "managed",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "obs_slo_alerting",
+      "code": "OBS-SLO-001",
+      "categoryId": "observability",
+      "text": "Alarm, SLI/SLO ve hata eşiği yönetimi nasıl tanımlanmış?",
+      "type": "single",
+      "weight": 5,
+      "required": true,
+      "options": [
+        {
+          "label": "Alarm ve SLO standardı yok",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Temel alarm kuralları var; önem derecesi ve aksiyon net değil",
+          "value": "basic_alert",
+          "score": 2
+        },
+        {
+          "label": "Bazı kritik servislerde SLI veya alarm eşiği tanımlı",
+          "value": "partial_sli",
+          "score": 3
+        },
+        {
+          "label": "Kritik servislerde SLO, alarm severity ve müdahale akışı tanımlı",
+          "value": "critical_slo",
+          "score": 4
+        },
+        {
+          "label": "Error budget, noise reduction, escalation ve post-incident iyileştirme döngüsü çalışıyor",
+          "value": "managed_sre",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "ops_incident",
+      "code": "OPS-INC-001",
+      "categoryId": "ops",
+      "text": "Incident kaydı, sınıflandırma, eskalasyon ve çözüm süreci nasıl işletiliyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Incident süreci kayıt ve sınıflandırma açısından standart değil",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Temel ticket veya çağrı akışı var; metrik takibi sınırlı",
+          "value": "basic_ticket",
+          "score": 2
+        },
+        {
+          "label": "Severity, owner ve çözüm takibi bazı ürünlerde tanımlı",
+          "value": "partial_severity",
+          "score": 3
+        },
+        {
+          "label": "Kritik servislerde SLA, eskalasyon ve iletişim modeli standart",
+          "value": "critical_incident",
+          "score": 4
+        },
+        {
+          "label": "Incident süreci SLO, RCA, problem management ve otomasyonla entegre",
+          "value": "managed",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "ops_runbook",
+      "code": "OPS-RUN-001",
+      "categoryId": "ops",
+      "text": "Operasyonel runbook ve müdahale adımları ne kadar güncel ve uygulanabilir?",
+      "type": "single",
+      "weight": 3,
+      "required": true,
+      "options": [
+        {
+          "label": "Runbook yok veya kişilerden öğreniliyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Bazı dokümanlar var; güncellik ve test durumu belirsiz",
+          "value": "partial_docs",
+          "score": 2
+        },
+        {
+          "label": "Kritik uygulamalar için temel runbook var",
+          "value": "critical_basic",
+          "score": 3
+        },
+        {
+          "label": "Runbook'lar düzenli gözden geçiriliyor ve incident sırasında kullanılıyor",
+          "value": "reviewed",
+          "score": 4
+        },
+        {
+          "label": "Runbook adımları otomasyon, tatbikat ve öğrenilmiş derslerle sürekli iyileştiriliyor",
+          "value": "automated_learning",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "ops_rca_learning",
+      "code": "OPS-RCA-001",
+      "categoryId": "ops",
+      "text": "Tekrarlayan hata, kesinti ve performans problemleri sonrası RCA nasıl yapılıyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "RCA düzenli yapılmıyor; çözüm sonrası konu kapanıyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Büyük olaylarda manuel RCA yazılıyor",
+          "value": "major_only",
+          "score": 2
+        },
+        {
+          "label": "RCA formatı var; aksiyon takibi bazı ekiplerde yapılıyor",
+          "value": "template_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik olaylarda kök neden, kalıcı aksiyon ve sorumlu takibi zorunlu",
+          "value": "critical_required",
+          "score": 4
+        },
+        {
+          "label": "RCA çıktıları backlog, runbook, test, monitoring ve mimari iyileştirmeye bağlanıyor",
+          "value": "learning_loop",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "gov_audit_evidence",
+      "code": "GOV-AUDIT-001",
+      "categoryId": "governance",
+      "text": "Build, test, güvenlik, onay ve deployment kanıtları nasıl saklanıyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Evidence düzenli tutulmuyor veya farklı yerlerde dağınık",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Bazı kayıtlar araçlarda var; raporlama manuel",
+          "value": "tool_records",
+          "score": 2
+        },
+        {
+          "label": "Kritik akışlarda build/test/onay kayıtları ilişkilendiriliyor",
+          "value": "critical_records",
+          "score": 3
+        },
+        {
+          "label": "Audit talepleri için merkezi ve izlenebilir evidence seti var",
+          "value": "central_evidence",
+          "score": 4
+        },
+        {
+          "label": "Evidence otomatik toplanıyor, saklama politikası ve denetim raporu düzenli üretiliyor",
+          "value": "automated_evidence",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "gov_rbac_sod",
+      "code": "GOV-RBAC-001",
+      "categoryId": "governance",
+      "text": "Production erişimi, görev ayrımı ve ayrıcalıklı yetkiler nasıl yönetiliyor?",
+      "type": "single",
+      "weight": 5,
+      "required": true,
+      "options": [
+        {
+          "label": "Production erişimleri geniş ve düzenli gözden geçirilmiyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Temel erişim grupları var; yetki temizliği manuel",
+          "value": "basic_groups",
+          "score": 2
+        },
+        {
+          "label": "Kritik sistemlerde rol bazlı erişim ve periyodik review var",
+          "value": "critical_review",
+          "score": 3
+        },
+        {
+          "label": "Görev ayrımı, onay ve geçici erişim kritik akışlarda uygulanıyor",
+          "value": "sod_critical",
+          "score": 4
+        },
+        {
+          "label": "JIT erişim, privileged access, audit ve policy ihlal takibi otomasyonla yönetiliyor",
+          "value": "managed_pam",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "gov_policy_standard",
+      "code": "GOV-POL-001",
+      "categoryId": "governance",
+      "text": "DevOps/DevSecOps minimum standartları ve istisna yönetimi nasıl uygulanıyor?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Minimum standart veya istisna süreci yok",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Bazı prensipler dokümante; uygulama takibi sınırlı",
+          "value": "principles",
+          "score": 2
+        },
+        {
+          "label": "Standartlar var; bazı ekiplerde kontrol ediliyor",
+          "value": "standard_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik ürünlerde standart, exception ve remediation takibi uygulanıyor",
+          "value": "critical_exception",
+          "score": 4
+        },
+        {
+          "label": "Policy as code, risk kabulü, süreli exception ve dashboard ile yönetiliyor",
+          "value": "managed_policy",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "platform_self_service",
+      "code": "PLAT-SELF-001",
+      "categoryId": "platform",
+      "text": "Ekipler repo, pipeline, ortam, secret veya monitoring ihtiyaçlarını nasıl başlatıyor?",
+      "type": "single",
+      "weight": 5,
+      "required": true,
+      "options": [
+        {
+          "label": "İhtiyaçlar operasyon veya platform ekibine manuel talep ile gidiyor",
+          "value": "manual_request",
+          "score": 1
+        },
+        {
+          "label": "Bazı talepler şablonla alınıyor fakat kurulum manuel",
+          "value": "template_request",
+          "score": 2
+        },
+        {
+          "label": "Bazı servisler otomasyon veya API ile oluşturulabiliyor",
+          "value": "partial_auto",
+          "score": 3
+        },
+        {
+          "label": "Kritik golden path'ler self-service akışla kullanılabiliyor",
+          "value": "critical_self_service",
+          "score": 4
+        },
+        {
+          "label": "Developer portal, policy, telemetry ve yaşam döngüsü yönetimiyle self-service standart",
+          "value": "managed_portal",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "platform_golden_paths",
+      "code": "PLAT-GP-001",
+      "categoryId": "platform",
+      "text": "Yeni ürün/servis başlatmak için golden path ve referans şablonlar ne kadar hazır?",
+      "type": "single",
+      "weight": 4,
+      "required": true,
+      "options": [
+        {
+          "label": "Yeni proje başlangıcı ekip tecrübesine bağlı",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Bazı örnek repo veya dokümanlar var",
+          "value": "examples",
+          "score": 2
+        },
+        {
+          "label": "Temel teknoloji şablonları bazı ekiplerde kullanılıyor",
+          "value": "template_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik teknoloji stack'leri için repo, pipeline, test ve security şablonları var",
+          "value": "critical_paths",
+          "score": 4
+        },
+        {
+          "label": "Golden path'ler ölçülüyor, versiyonlanıyor ve ekip geri bildirimiyle geliştiriliyor",
+          "value": "managed_paths",
+          "score": 5
+        }
+      ]
+    },
+    {
+      "id": "platform_developer_experience",
+      "code": "PLAT-DEX-001",
+      "categoryId": "platform",
+      "text": "Geliştirici deneyimi, onboarding süresi ve platform kullanım memnuniyeti nasıl ölçülüyor?",
+      "type": "single",
+      "weight": 3,
+      "required": true,
+      "options": [
+        {
+          "label": "Ölçülmüyor; sorunlar bireysel geri bildirimle biliniyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Dönemsel geri bildirim alınıyor fakat aksiyon takibi sınırlı",
+          "value": "feedback_partial",
+          "score": 2
+        },
+        {
+          "label": "Onboarding ve platform talepleri bazı metriklerle takip ediliyor",
+          "value": "metrics_partial",
+          "score": 3
+        },
+        {
+          "label": "Kritik ekiplerde developer experience hedefleri ve iyileştirme backlog'u var",
+          "value": "critical_dx",
+          "score": 4
+        },
+        {
+          "label": "DEX metrikleri platform roadmap, self-service ve eğitim planına düzenli yansıyor",
+          "value": "managed_dx",
+          "score": 5
+        }
+      ]
+    }
+  ]
+}
