@@ -197,7 +197,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: assessment-backend
+                name: assessment-app
                 port:
                   number: 80
           - path: /
