@@ -2,6 +2,14 @@ import { Answers, OrganizationProfile, questions } from "@/data/assessment";
 import { AssessmentScore } from "@/features/scoring/scoring";
 import { Recommendation } from "@/features/recommendations/recommendations";
 
+export function buildExecutiveSummary(profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[]) {
+  const priorityItems = recommendations.slice(0, 4).map((item) => item.title);
+  const criticalCount = recommendations.filter((item) => item.severity === "Critical").length;
+  const focus = priorityItems.length > 0 ? priorityItems.join(", ") : "kritik açık aksiyon bulunmamaktadır";
+
+  return `${profile.companyName} için yapılan SDLC & DevSecOps Assessment sonucunda genel skor ${score.overallScore}/100 (${score.maturityLevel}) olarak hesaplanmıştır. Öncelikli iyileştirme alanları ${focus} başlıklarında yoğunlaşmaktadır. ${criticalCount > 0 ? `${criticalCount} kritik bulgu için ilk fazda sahiplik, onay mekanizması ve kanıt takibi oluşturulmalıdır.` : "Kritik seviyede bulgu üretilmemiştir; mevcut iyileştirme planı ölçülebilir kalite kapıları ve düzenli denetim kanıtlarıyla güçlendirilmelidir."} Rapor, danışman incelemesi için aynı token üzerinde hazırlanmıştır.`;
+}
+
 export function buildReportPayload(profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[], answers: Answers) {
   const lowestCategories = [...score.categoryScores].sort((a, b) => a.score - b.score).slice(0, 5);
   const answerRows = questions.map((question) => ({
@@ -27,7 +35,7 @@ export function generateMarkdownReport(profile: OrganizationProfile, score: Asse
   const formatAnswer = (value: Answers[string]) => Array.isArray(value) ? value.join(", ") : String(value ?? "-");
   const answerLines = payload.answers.map((answer) => `| ${answer.code} | ${answer.question} | ${formatAnswer(answer.answer)} | ${formatAnswer(answer.note)} |`);
 
-  return `# ${profile.companyName} DevOps & DevSecOps Maturity Report
+  return `# ${profile.companyName} SDLC & DevSecOps Assessment Report
 
 ## Executive Summary
 
@@ -69,7 +77,7 @@ export function generateHtmlReport(profile: OrganizationProfile, score: Assessme
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${escapeHtml(profile.companyName)} DevOps & DevSecOps Maturity Report</title>
+  <title>${escapeHtml(profile.companyName)} SDLC & DevSecOps Assessment Report</title>
   <style>
     :root { color: #172331; background: #f6f8fb; font-family: Arial, Helvetica, sans-serif; }
     body { margin: 0; padding: 32px; }
@@ -96,7 +104,7 @@ export function generateHtmlReport(profile: OrganizationProfile, score: Assessme
 <body>
   <main>
     <header>
-      <h1>${escapeHtml(profile.companyName)} DevOps & DevSecOps Maturity Report</h1>
+      <h1>${escapeHtml(profile.companyName)} SDLC & DevSecOps Assessment Report</h1>
       <div class="meta">Generated at ${escapeHtml(payload.generatedAt)}</div>
     </header>
     <section>

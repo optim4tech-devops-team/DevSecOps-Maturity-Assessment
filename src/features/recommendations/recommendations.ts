@@ -28,9 +28,6 @@ const lowScore = (answers: Answers, questionId: string, threshold = 3) => answer
 
 export function generateRecommendations(answers: Answers, categoryScores: CategoryScore[]): Recommendation[] {
   const rules: Array<[boolean, Recommendation]> = [
-    [lowScore(answers, "sec_sast_tool", 3), {
-      id: "DEVSECOPS-SAST-001", category: "DevSecOps", severity: "High", priority: "P1", title: "SAST çözümü standardize edilmeli", description: "Statik kod güvenlik analizi kurumsal standart olarak görünmüyor.", recommendation: "SonarQube, Semgrep veya kurumsal SAST aracı PR aşamasında quality gate ile zorunlu hale getirilmeli.", phase: "Phase 2", expectedImpact: "Kod seviyesindeki kritik açıkların merge öncesi yakalanması", effort: "Medium"
-    }],
     [lowScore(answers, "sec_sast_gate", 4), {
       id: "DEVSECOPS-SAST-GATE-001", category: "DevSecOps", severity: "High", priority: "P1", title: "SAST bulguları karar mekanizmasına bağlanmalı", description: "Güvenlik tarama sonuçları merge veya release kararını yeterince etkilemiyor.", recommendation: "Risk eşiği, exception, SLA ve remediation takibi olan bloklayıcı quality gate modeli kurulmalı.", phase: "Phase 2", expectedImpact: "Yüksek riskli açıkların üretime taşınmasının engellenmesi", effort: "Medium"
     }],
@@ -42,9 +39,6 @@ export function generateRecommendations(answers: Answers, categoryScores: Catego
     }],
     [lowScore(answers, "sec_secret_scan", 4), {
       id: "DEVSECOPS-SECRET-001", category: "DevSecOps", severity: "Critical", priority: "P1", title: "Secret scanning zorunlu hale getirilmeli", description: "Repository ve PR süreçlerinde secret sızıntısı kontrolü eksik.", recommendation: "GitLeaks, GitGuardian veya GitHub Secret Scanning PR ve scheduled scan olarak uygulanmalı; rotation süreci tanımlanmalı.", phase: "Phase 1", expectedImpact: "Credential sızıntısı ve lateral movement riskinin azaltılması", effort: "Low"
-    }],
-    [lowScore(answers, "sec_container_scan", 4), {
-      id: "DEVSECOPS-CONTAINER-001", category: "DevSecOps", severity: "High", priority: "P1", title: "Container image scanning eklenmeli", description: "Container imajları üretime çıkmadan önce CVE açısından taranmıyor.", recommendation: "Trivy, Aqua veya Prisma taraması registry ve pipeline aşamasında gate olarak uygulanmalı.", phase: "Phase 2", expectedImpact: "Kritik image CVE'lerinin deploy öncesi durdurulması", effort: "Medium"
     }],
     [lowScore(answers, "cd_prod_approval", 4), {
       id: "CD-APPROVAL-001", category: "CD & Deployment", severity: "Critical", priority: "P1", title: "Production approval gate kurulmalı", description: "Production deploy için denetlenebilir onay mekanizması yok.", recommendation: "Jira, ITSM veya pipeline approval gate audit trail ile zorunlu hale getirilmeli.", phase: "Phase 1", expectedImpact: "Yetkisiz ve kontrolsüz production değişikliklerinin önlenmesi", effort: "Low"
@@ -66,9 +60,6 @@ export function generateRecommendations(answers: Answers, categoryScores: Catego
     }],
     [lowScore(answers, "test_api_automation", 3), {
       id: "TEST-API-001", category: "Test Automation", severity: "High", priority: "P2", title: "API test otomasyonu güçlendirilmeli", description: "API ve entegrasyon testleri pipeline kararlarında yeterince kullanılmıyor.", recommendation: "Kritik servisler için API/contract test setleri pipeline gate olarak tasarlanmalı.", phase: "Phase 2", expectedImpact: "Entegrasyon hatalarının test ortamında erken yakalanması", effort: "Medium"
-    }],
-    [lowScore(answers, "architecture_api_gateway", 3), {
-      id: "ARCH-API-001", category: "Mimari ve Entegrasyon", severity: "Medium", priority: "P2", title: "API yönetimi merkezi hale getirilmeli", description: "Servis çağrıları ve dış entegrasyonlar merkezi policy ile yönetilmiyor.", recommendation: "API Gateway, authentication, rate limit, logging ve tüketici bazlı görünürlük için referans mimari oluşturulmalı.", phase: "Phase 2", expectedImpact: "Entegrasyon risklerinin ve servisler arası bağımlılıkların azalması", effort: "High"
     }],
     [lowScore(answers, "gov_audit_evidence", 4), {
       id: "GOV-AUDIT-001", category: "Governance", severity: "Medium", priority: "P2", title: "Audit evidence otomatikleştirilmeli", description: "Build, test, onay ve deployment kanıtları merkezi ve tekrar üretilebilir değil.", recommendation: "Pipeline, SCM, ITSM ve güvenlik araçlarından evidence toplayan standart raporlama akışı kurulmalı.", phase: "Phase 3", expectedImpact: "Denetim hazırlık süresinin kısalması ve güvenilirlik artışı", effort: "Medium"

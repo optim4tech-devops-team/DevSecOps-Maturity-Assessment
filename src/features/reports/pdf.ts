@@ -33,7 +33,7 @@ export function generateExecutivePdfReport(profile: OrganizationProfile, score: 
   const orderedCategories = [...score.categoryScores].sort((a, b) => b.score - a.score);
   const lowestCategories = [...score.categoryScores].sort((a, b) => a.score - b.score).slice(0, 6);
   const roadmap = buildRoadmap(recommendations);
-  const title = `${profile.companyName} SDLC & DEVSECOPS OLGUNLUK DEGERLENDIRMESI`;
+  const title = `${profile.companyName} SDLC & DEVSECOPS ASSESSMENT RAPORU`;
 
   fill(doc, 0, 0, pageWidth, pageHeight, 255, 255, 255);
   fill(doc, 0, 760, pageWidth, 82, ...navy);

@@ -6,6 +6,7 @@ export type AssessmentRecord = {
   id: string;
   token: string;
   status: "Draft" | "InProgress" | "Completed" | "Archived";
+  reportStatus?: "NotStarted" | "Processing" | "Ready" | "Failed";
   organization: OrganizationProfile;
   answers: Answers;
   score?: AssessmentScore;
@@ -14,6 +15,9 @@ export type AssessmentRecord = {
   createdAt: string;
   updatedAt: string;
   completedAt?: string;
+  reportRequestedAt?: string;
+  reportReadyAt?: string;
+  reportGeneratedAt?: string;
 };
 
-export type PublicAssessmentPayload = Pick<AssessmentRecord, "id" | "token" | "status" | "organization" | "answers" | "score" | "recommendations" | "aiSummary">;
+export type PublicAssessmentPayload = Pick<AssessmentRecord, "id" | "token" | "status" | "reportStatus" | "organization" | "answers" | "score" | "recommendations" | "aiSummary" | "reportReadyAt" | "reportGeneratedAt">;
