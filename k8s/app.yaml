@@ -96,7 +96,7 @@ metadata:
   name: assessment-backend
   namespace: assesment
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: assessment-backend
