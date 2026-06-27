@@ -6,6 +6,7 @@ import { AssessmentEditor } from "@/components/AssessmentEditor";
 import { AssessmentRecord } from "@/lib/types";
 import { calculateAssessment } from "@/features/scoring/scoring";
 import { ScoreDonut } from "@/components/Charts";
+import { DeliveryFlow } from "@/components/DeliveryFlow";
 
 export default function PublicAssessmentPage({ params }: { params: Promise<{ token: string }> }) {
   const [token, setToken] = useState("");
@@ -31,14 +32,17 @@ export default function PublicAssessmentPage({ params }: { params: Promise<{ tok
       <header className="border-b border-line bg-white px-4 py-4 sm:px-6">
         <div className="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <h1 className="text-lg font-semibold text-ink">{record.organization.companyName} Assessment</h1>
-            <p className="text-sm text-muted">Bu link sadece size özel token ile çalışır. Cevaplarınızı kaydedip tamamlayabilirsiniz.</p>
+            <h1 className="text-lg font-semibold text-ink">{record.organization.companyName} SDLC & DevSecOps Assessment</h1>
+            <p className="text-sm text-muted">Enterprise Assessment Platform üzerindeki bu token sadece kurumunuza özeldir. Cevaplarınızı kaydedip tamamlayabilirsiniz.</p>
           </div>
           <Link href="/" className="text-sm font-semibold text-teal">Admin</Link>
         </div>
       </header>
-      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 p-3 sm:p-4 xl:grid-cols-[minmax(0,1fr)_300px]">
-        <AssessmentEditor token={token} initialProfile={record.organization} initialAnswers={record.answers} onSaved={() => loadAssessment(token)} />
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-4 p-3 sm:p-4 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="space-y-4">
+          <DeliveryFlow record={record} compact />
+          <AssessmentEditor token={token} initialProfile={record.organization} initialAnswers={record.answers} onSaved={() => loadAssessment(token)} />
+        </section>
         <aside className="space-y-4">
           <div className="panel p-4">
             <h2 className="text-sm font-semibold">Current score</h2>

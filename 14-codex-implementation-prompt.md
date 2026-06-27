@@ -4,7 +4,7 @@ Aşağıdaki prompt Codex'e verilerek ilk MVP geliştirilebilir.
 
 ## Prompt
 
-You are building a web application called "Global DevOps & DevSecOps Maturity Assessment Platform".
+You are building a web application called "Enterprise Assessment Platform" with an initial "SDLC & DevSecOps Assessment" module.
 
 Build a production-ready MVP with the following stack:
 

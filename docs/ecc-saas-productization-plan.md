@@ -1,4 +1,4 @@
-# DevSecOps Maturity Assessment - ECC SaaS Productization Plan
+# Enterprise Assessment Platform - ECC SaaS Productization Plan
 
 ## CAPABILITY
 

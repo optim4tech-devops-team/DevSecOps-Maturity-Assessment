@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, AlertTriangle, BarChart3, CheckCircle2, Clipboard, Clock3, Download, Eye, FileDown, FileText, KeyRound, Lock, LogOut, Plus, RefreshCcw, Route, ShieldCheck, Sparkles, Trash2, TrendingUp, User } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, Clipboard, Clock3, Download, Eye, FileDown, FileText, KeyRound, Lock, LogOut, Plus, RefreshCcw, Route, ShieldCheck, Sparkles, Trash2, TrendingUp, User } from "lucide-react";
 import { AssessmentRecord } from "@/lib/types";
 import { calculateAssessment } from "@/features/scoring/scoring";
 import { buildRoadmap, generateRecommendations } from "@/features/recommendations/recommendations";
 import { CategoryBars, MaturityRadar, ScoreDonut } from "@/components/Charts";
 import { AssessmentEditor } from "@/components/AssessmentEditor";
+import { DeliveryFlow } from "@/components/DeliveryFlow";
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== "undefined" ? window.location.origin : "");
 const adminSessionToken = "assessment-admin-session-v2";
@@ -20,33 +21,6 @@ const navigationItems: Array<{ id: WorkspaceView; label: string; icon: typeof Ba
   { id: "roadmap", label: "Roadmap", icon: Route },
   { id: "reports", label: "Reports", icon: FileText },
   { id: "ai", label: "AI Summary", icon: Sparkles }
-];
-
-const deliveryFlow = [
-  {
-    title: "Token link",
-    description: "Customer assessment linki paylaşılır.",
-    output: "Public form",
-    icon: Clipboard
-  },
-  {
-    title: "Assessment",
-    description: "Müşteri veya danışman soruları doldurur.",
-    output: "Answers + score",
-    icon: CheckCircle2
-  },
-  {
-    title: "Portal review",
-    description: "Skor, grafik, gap ve roadmap panelde yorumlanır.",
-    output: "Live dashboard",
-    icon: BarChart3
-  },
-  {
-    title: "Final report",
-    description: "Danışman onaylı çıktı resmi teslim dokümanı olur.",
-    output: "PDF / Markdown",
-    icon: FileDown
-  }
 ];
 
 export default function Home() {
@@ -143,7 +117,7 @@ export default function Home() {
                 Assessment Command Center
               </h1>
               <div className="mt-6 h-0.5 w-14 bg-teal" />
-              <p className="mt-6 max-w-[520px] text-lg leading-8 text-white/72">Current module: SDLC & DevSecOps Assessment</p>
+              <p className="mt-6 max-w-[520px] text-lg leading-8 text-white/72">Assessment module catalog for SDLC, Kubernetes, network security and infrastructure domains.</p>
             </div>
 
             <div className="mt-8 grid max-w-[420px] gap-4">
@@ -216,8 +190,8 @@ export default function Home() {
         <div className="mb-8 flex items-center gap-3">
           <div className="grid h-9 w-9 place-items-center rounded-md bg-teal"><ShieldCheck size={19} /></div>
           <div>
-            <div className="text-sm font-semibold leading-tight">Assessment Platform</div>
-            <div className="text-xs text-white/60">SDLC & DevSecOps module</div>
+            <div className="text-sm font-semibold leading-tight">Enterprise Assessment</div>
+            <div className="text-xs text-white/60">Active: SDLC & DevSecOps</div>
           </div>
         </div>
         {navigationItems.map((item) => (
@@ -236,7 +210,7 @@ export default function Home() {
         <header className="flex flex-col gap-3 border-b border-line bg-white px-4 py-3 xl:flex-row xl:items-center xl:justify-between xl:px-5">
           <div className="min-w-0">
             <h1 className="text-base font-semibold text-ink">Enterprise Assessment Platform</h1>
-            <p className="text-xs text-muted">Aktif modül: SDLC & DevSecOps Assessment. Sonraki modüller Kubernetes, ağ güvenliği ve altyapı assessment kapsamlarıyla genişletilebilir.</p>
+            <p className="text-xs text-muted">Aktif assessment modülü: SDLC & DevSecOps. Platform Kubernetes, ağ güvenliği ve altyapı assessment modülleriyle genişletilebilir.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <select className="focus-ring min-w-[190px] rounded-md border border-line bg-white px-3 py-2 text-sm" value={selectedToken} onChange={(event) => setSelectedToken(event.target.value)}>
@@ -376,7 +350,7 @@ function AdminWorkspace({
         ) : null}
         {activeView === "recommendations" ? <RecommendationsView recommendations={recommendations} /> : null}
         {activeView === "roadmap" ? <RoadmapView roadmap={roadmap} /> : null}
-        {activeView === "reports" ? <ReportsView record={record} reportReady={reportReady} /> : null}
+        {activeView === "reports" ? <ReportsView record={record} reportReady={reportReady} reportProcessing={reportProcessing} onRefresh={onSaved} /> : null}
         {activeView === "ai" ? <AISummaryView record={record} reportReady={reportReady} reportProcessing={reportProcessing} /> : null}
         {activeView === "assessment" || activeView === "profile" ? (
           <div className="panel p-4">
@@ -472,24 +446,53 @@ function RoadmapView({ roadmap }: { roadmap: ReturnType<typeof buildRoadmap> }) 
   );
 }
 
-function ReportsView({ record, reportReady }: { record: AssessmentRecord; reportReady: boolean }) {
+function ReportsView({ record, reportReady, reportProcessing, onRefresh }: { record: AssessmentRecord; reportReady: boolean; reportProcessing: boolean; onRefresh: () => Promise<void> }) {
+  const readyAt = record.reportReadyAt ? new Date(record.reportReadyAt).toLocaleString("tr-TR") : "";
   return (
-    <div className="panel p-4">
-      <h2 className="mb-3 text-sm font-semibold">Reports</h2>
-      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-        <ReportAction icon={FileText} title="HTML preview" description="Canlı rapor önizlemesi" href={`/api/export/${record.token}/html`} />
-        <ReportAction icon={FileDown} title="Markdown export" description="Danışman düzenlemesi için metin çıktı" href={`/api/export/${record.token}/markdown`} />
-        <ReportAction icon={Activity} title="JSON export" description="Skor, cevap ve öneri verisi" href={`/api/export/${record.token}/json`} />
-        <ReportAction icon={Download} title="Executive PDF" description={reportReady ? "AI yorumu ve PDF hazır" : "Assessment tamamlandıktan sonra hazırlanır"} href={reportReady ? `/api/export/${record.token}/pdf` : undefined} disabled={!reportReady} />
+    <div className="space-y-4">
+      <div className="panel p-4">
+        <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold">Reports</h2>
+            <p className="mt-1 text-xs leading-5 text-muted">PDF çıktısı assessment tamamlandıktan sonra aynı token üzerinde hazırlanır. Hazır olunca indirme aktif hale gelir.</p>
+          </div>
+          <button onClick={() => void onRefresh()} className="focus-ring flex w-fit items-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-xs font-semibold text-ink"><RefreshCcw size={14} /> Durumu kontrol et</button>
+        </div>
+        {reportProcessing ? (
+          <div className="mb-4 rounded-md border border-amber/30 bg-amber/10 p-4">
+            <div className="flex items-center gap-3">
+              <span className="h-3 w-3 animate-pulse rounded-full bg-amber" />
+              <div>
+                <div className="text-sm font-semibold text-ink">PDF rapor hazırlanıyor</div>
+                <div className="mt-1 text-xs leading-5 text-muted">AI yorumlama ve PDF üretim işlemi devam ediyor. Tahmini hazır olma zamanı: {readyAt || "assessment tamamlandıktan sonra planlanır"}.</div>
+              </div>
+            </div>
+          </div>
+        ) : null}
+        {!reportProcessing && !reportReady ? (
+          <div className="mb-4 rounded-md border border-line bg-wash p-4 text-sm text-muted">PDF rapor assessment tamamlandıktan sonra hazırlanacaktır.</div>
+        ) : null}
+        {reportReady ? (
+          <div className="mb-4 rounded-md border border-teal/30 bg-teal/5 p-4 text-sm font-semibold text-teal">PDF rapor hazır. Executive PDF kartından indirebilirsiniz.</div>
+        ) : null}
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <ReportAction icon={FileText} title="HTML preview" description="Canlı rapor önizlemesi" href={`/api/export/${record.token}/html`} />
+          <ReportAction icon={FileDown} title="Markdown export" description="Danışman düzenlemesi için metin çıktı" href={`/api/export/${record.token}/markdown`} />
+          <ReportAction icon={Activity} title="JSON export" description="Skor, cevap ve öneri verisi" href={`/api/export/${record.token}/json`} />
+          <ReportAction icon={Download} title="Executive PDF" description={reportReady ? "AI yorumu ve PDF hazır" : reportProcessing ? "Hazırlanıyor, lütfen daha sonra tekrar kontrol edin" : "Assessment tamamlandıktan sonra hazırlanır"} href={reportReady ? `/api/export/${record.token}/pdf` : undefined} disabled={!reportReady} busy={reportProcessing} />
+        </div>
       </div>
     </div>
   );
 }
 
-function ReportAction({ icon: Icon, title, description, href, disabled }: { icon: typeof FileText; title: string; description: string; href?: string; disabled?: boolean }) {
+function ReportAction({ icon: Icon, title, description, href, disabled, busy }: { icon: typeof FileText; title: string; description: string; href?: string; disabled?: boolean; busy?: boolean }) {
   const content = (
     <div className={`rounded-md border border-line p-4 ${disabled ? "bg-wash opacity-70" : "bg-white hover:border-teal/50"}`}>
-      <div className="mb-3 grid h-9 w-9 place-items-center rounded-md bg-teal/10 text-teal"><Icon size={18} /></div>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="grid h-9 w-9 place-items-center rounded-md bg-teal/10 text-teal"><Icon size={18} /></div>
+        {busy ? <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-amber" /> : null}
+      </div>
       <div className="text-sm font-semibold text-ink">{title}</div>
       <p className="mt-1 text-xs leading-5 text-muted">{description}</p>
     </div>
@@ -525,39 +528,8 @@ function AISummaryView({ record, reportReady, reportProcessing }: { record: Asse
               <div className="text-xs text-muted">{record.reportGeneratedAt ? new Date(record.reportGeneratedAt).toLocaleString("tr-TR") : readyAt || "Complete sonrası planlanır"}</div>
             </div>
           </div>
-          {reportReady ? <a href={`/api/export/${record.token}/pdf`} className="focus-ring flex w-full items-center justify-center gap-2 rounded-md bg-ink px-3 py-2 text-sm font-semibold text-white"><Download size={16} /> Download PDF</a> : <button disabled className="w-full cursor-not-allowed rounded-md border border-line bg-wash px-3 py-2 text-sm font-semibold text-muted">PDF not ready</button>}
+          {reportReady ? <a href={`/api/export/${record.token}/pdf`} className="focus-ring flex w-full items-center justify-center gap-2 rounded-md bg-ink px-3 py-2 text-sm font-semibold text-white"><Download size={16} /> Download PDF</a> : <button disabled className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-md border border-line bg-wash px-3 py-2 text-sm font-semibold text-muted">{reportProcessing ? <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-amber" /> : null} {reportProcessing ? "PDF preparing" : "PDF not ready"}</button>}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function DeliveryFlow({ record, recommendationCount }: { record: AssessmentRecord; recommendationCount: number }) {
-  const completedIndex = record.status === "Completed" ? 2 : record.status === "InProgress" ? 1 : 0;
-
-  return (
-    <div className="panel p-4">
-      <div className="mb-4 flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-sm font-semibold">Assessment delivery flow</h2>
-          <p className="mt-1 text-xs leading-5 text-muted">Portal canlı analiz ekranıdır; final çıktı müşteriyle PDF/Markdown rapor olarak paylaşılır.</p>
-        </div>
-        <span className="rounded bg-wash px-2 py-1 text-xs font-semibold text-muted">{record.status}</span>
-      </div>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-4">
-        {deliveryFlow.map((step, index) => {
-          const active = index <= completedIndex || (index === 2 && recommendationCount > 0);
-          return (
-            <div key={step.title} className={`rounded-md border p-3 ${active ? "border-teal/35 bg-teal/5" : "border-line bg-white"}`}>
-              <div className={`mb-3 grid h-8 w-8 place-items-center rounded-md ${active ? "bg-teal text-white" : "bg-wash text-muted"}`}>
-                <step.icon size={16} />
-              </div>
-              <div className="text-sm font-semibold text-ink">{step.title}</div>
-              <p className="mt-1 min-h-[40px] text-xs leading-5 text-muted">{step.description}</p>
-              <div className="mt-2 rounded bg-white px-2 py-1 text-xs font-semibold text-muted">{step.output}</div>
-            </div>
-          );
-        })}
       </div>
     </div>
   );

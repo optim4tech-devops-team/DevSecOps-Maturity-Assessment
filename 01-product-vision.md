@@ -2,7 +2,7 @@
 
 ## Ürün Adı
 
-Global DevOps & DevSecOps Maturity Assessment Platform
+Enterprise Assessment Platform
 
 ## Problem
 
