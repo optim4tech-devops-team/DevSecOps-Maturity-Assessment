@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Activity, AlertTriangle, BarChart3, Clipboard, Clock3, Download, Eye, FileDown, FileText, KeyRound, Lock, LogOut, Plus, RefreshCcw, Route, ShieldCheck, Sparkles, Trash2, TrendingUp, User } from "lucide-react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { AssessmentRecord } from "@/lib/types";
 import { calculateAssessment } from "@/features/scoring/scoring";
 import { buildRoadmap, generateRecommendations } from "@/features/recommendations/recommendations";
@@ -11,19 +12,27 @@ import { DeliveryFlow } from "@/components/DeliveryFlow";
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== "undefined" ? window.location.origin : "");
 const adminSessionToken = "assessment-admin-session-v2";
-type WorkspaceView = "profile" | "assessment" | "results" | "recommendations" | "roadmap" | "reports" | "ai";
+type WorkspaceView = "customers" | "profile" | "assessment" | "results" | "recommendations" | "roadmap" | "reports" | "summary";
+
+const motionTokens = {
+  duration: { fast: 0.18, normal: 0.28 },
+  easing: { smooth: [0.22, 1, 0.36, 1] as [number, number, number, number] },
+  distance: { sm: 8, md: 14 }
+};
 
 const navigationItems: Array<{ id: WorkspaceView; label: string; icon: typeof BarChart3 }> = [
+  { id: "customers", label: "Customers", icon: User },
   { id: "profile", label: "Organization Profile", icon: User },
   { id: "assessment", label: "Assessment", icon: Clipboard },
   { id: "results", label: "Results", icon: BarChart3 },
   { id: "recommendations", label: "Recommendations", icon: AlertTriangle },
   { id: "roadmap", label: "Roadmap", icon: Route },
   { id: "reports", label: "Reports", icon: FileText },
-  { id: "ai", label: "AI Summary", icon: Sparkles }
+  { id: "summary", label: "Summary", icon: Sparkles }
 ];
 
 export default function Home() {
+  const reduceMotion = useReducedMotion();
   const [loggedIn, setLoggedIn] = useState(false);
   const [login, setLogin] = useState({ username: "admin", password: "" });
   const [loginError, setLoginError] = useState("");
@@ -195,15 +204,18 @@ export default function Home() {
           </div>
         </div>
         {navigationItems.map((item) => (
-          <button
+          <motion.button
             key={item.id}
             type="button"
             onClick={() => setActiveView(item.id)}
+            whileHover={reduceMotion ? undefined : { x: 2 }}
+            whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+            transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
             className={`focus-ring mb-1 flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition ${activeView === item.id ? "bg-white/12 text-white" : "text-white/70 hover:bg-white/7 hover:text-white"}`}
           >
             <item.icon size={15} />
             {item.label}
-          </button>
+          </motion.button>
         ))}
       </aside>
       <section className="min-w-0">
@@ -216,8 +228,6 @@ export default function Home() {
             <select className="focus-ring min-w-[190px] rounded-md border border-line bg-white px-3 py-2 text-sm" value={selectedToken} onChange={(event) => setSelectedToken(event.target.value)}>
               {assessments.map((item) => <option key={item.token} value={item.token}>{item.organization.companyName}</option>)}
             </select>
-            <button onClick={createLink} className="focus-ring flex items-center gap-2 rounded-md bg-teal px-3 py-2 text-sm font-semibold text-white"><Plus size={16} /> New link</button>
-            <button onClick={deleteSelectedAssessment} disabled={!selectedToken} className="focus-ring rounded-md border border-line bg-white p-2 text-danger disabled:cursor-not-allowed disabled:opacity-40" title="Delete selected customer"><Trash2 size={16} /></button>
             <button onClick={loadAssessments} className="focus-ring rounded-md border border-line bg-white p-2 text-ink"><RefreshCcw size={16} /></button>
             <button onClick={logout} className="focus-ring flex items-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink"><LogOut size={16} /> Logout</button>
           </div>
@@ -225,26 +235,32 @@ export default function Home() {
         <nav className="border-b border-line bg-white px-3 py-2 lg:hidden">
           <div className="flex gap-2 overflow-x-auto pb-1">
             {navigationItems.map((item) => (
-              <button
+              <motion.button
                 key={item.id}
                 type="button"
                 onClick={() => setActiveView(item.id)}
+                whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+                transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
                 className={`focus-ring flex shrink-0 items-center gap-2 rounded-md border px-3 py-2 text-xs font-semibold ${activeView === item.id ? "border-teal bg-teal text-white" : "border-line bg-white text-muted"}`}
               >
                 <item.icon size={14} />
                 {item.label}
-              </button>
+              </motion.button>
             ))}
           </div>
         </nav>
-        {selected ? <AdminWorkspace record={selected} activeView={activeView} onSaved={loadAssessments} newCompany={newCompany} setNewCompany={setNewCompany} createLink={createLink} /> : (
+        {selected ? <AdminWorkspace record={selected} activeView={activeView} onSaved={loadAssessments} newCompany={newCompany} setNewCompany={setNewCompany} createLink={createLink} deleteSelectedAssessment={deleteSelectedAssessment} /> : (
           <div className="p-4">
             <div className="panel grid min-h-[320px] place-items-center p-8 text-center">
               <div>
                 <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-md bg-teal/10 text-teal"><Plus size={22} /></div>
                 <h2 className="text-base font-semibold text-ink">Henüz customer assessment yok</h2>
                 <p className="mt-2 text-sm text-muted">Yeni müşteri linki oluşturup assessment akışını başlatabilirsiniz.</p>
-                <button onClick={createLink} className="focus-ring mt-5 inline-flex items-center gap-2 rounded-md bg-teal px-3 py-2 text-sm font-semibold text-white"><Plus size={16} /> New link</button>
+                <div className="mx-auto mt-5 grid max-w-md grid-cols-1 gap-2 text-left sm:grid-cols-2">
+                  <input className="focus-ring rounded-md border border-line px-3 py-2 text-sm" value={newCompany.companyName} onChange={(event) => setNewCompany({ ...newCompany, companyName: event.target.value })} placeholder="Company name" />
+                  <input className="focus-ring rounded-md border border-line px-3 py-2 text-sm" value={newCompany.sector} onChange={(event) => setNewCompany({ ...newCompany, sector: event.target.value })} placeholder="Sector" />
+                </div>
+                <button onClick={createLink} className="focus-ring mt-3 inline-flex items-center gap-2 rounded-md bg-teal px-3 py-2 text-sm font-semibold text-white"><Plus size={16} /> Create customer</button>
               </div>
             </div>
           </div>
@@ -260,7 +276,8 @@ function AdminWorkspace({
   onSaved,
   newCompany,
   setNewCompany,
-  createLink
+  createLink,
+  deleteSelectedAssessment
 }: {
   record: AssessmentRecord;
   activeView: WorkspaceView;
@@ -268,7 +285,9 @@ function AdminWorkspace({
   newCompany: { companyName: string; sector: string };
   setNewCompany: (value: { companyName: string; sector: string }) => void;
   createLink: () => Promise<void>;
+  deleteSelectedAssessment: () => Promise<void>;
 }) {
+  const reduceMotion = useReducedMotion();
   const score = record.score ?? calculateAssessment(record.answers);
   const recommendations = record.recommendations ?? generateRecommendations(record.answers, score.categoryScores);
   const roadmap = buildRoadmap(recommendations);
@@ -278,52 +297,38 @@ function AdminWorkspace({
   const lowestCategories = [...score.categoryScores].sort((a, b) => a.score - b.score).slice(0, 4);
   const criticalRecommendations = recommendations.filter((item) => item.severity === "Critical").length;
 
-  async function copyLink() {
-    await navigator.clipboard.writeText(publicLink);
-  }
-
   return (
-    <div className="grid grid-cols-1 gap-4 p-3 sm:p-4 xl:grid-cols-[340px_minmax(0,1fr)]">
-      <section className="space-y-4">
-        <div className="panel p-4">
-          <h2 className="mb-3 text-sm font-semibold">Create customer assessment</h2>
-          <div className="grid grid-cols-1 gap-2">
-            <input className="focus-ring rounded-md border border-line px-3 py-2 text-sm" value={newCompany.companyName} onChange={(event) => setNewCompany({ ...newCompany, companyName: event.target.value })} placeholder="Company name" />
-            <input className="focus-ring rounded-md border border-line px-3 py-2 text-sm" value={newCompany.sector} onChange={(event) => setNewCompany({ ...newCompany, sector: event.target.value })} placeholder="Sector" />
-            <button onClick={createLink} className="focus-ring flex items-center justify-center gap-2 rounded-md bg-teal px-3 py-2 text-sm font-semibold text-white"><Plus size={16} /> Create token link</button>
-          </div>
-        </div>
-        <div className="panel p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold">Customer token link</h2>
-            <span className="rounded bg-wash px-2 py-1 text-xs text-muted">{record.status}</span>
-          </div>
-          <div className="mb-3 break-all rounded-md border border-line bg-wash p-3 text-xs text-muted">{publicLink}</div>
-          <button onClick={copyLink} className="focus-ring flex w-full items-center justify-center gap-2 rounded-md bg-ink px-3 py-2 text-sm font-semibold text-white"><Clipboard size={16} /> Copy customer link</button>
-        </div>
-        {(activeView === "assessment" || activeView === "profile") ? (
-          <AssessmentEditor token={record.token} initialProfile={record.organization} initialAnswers={record.answers} onSaved={onSaved} compact />
-        ) : (
-          <div className="panel p-4">
-            <h2 className="mb-3 text-sm font-semibold">Assessment summary</h2>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <MetricTile label="Status" value={record.status} />
-              <MetricTile label="Completion" value={`${score.completion}%`} />
-              <MetricTile label="Score" value={`${score.overallScore}/100`} />
-              <MetricTile label="Findings" value={`${recommendations.length}`} />
-            </div>
-          </div>
-        )}
-      </section>
-      <section className="space-y-4">
-        <DeliveryFlow record={record} recommendationCount={recommendations.length} />
+    <div className="space-y-4 p-3 sm:p-4">
+      <DeliveryFlow record={record} recommendationCount={recommendations.length} />
+      <AnimatePresence mode="wait">
+        <motion.section
+          key={activeView}
+          initial={{ opacity: 0, y: reduceMotion ? 0 : motionTokens.distance.sm }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: reduceMotion ? 0 : -motionTokens.distance.sm }}
+          transition={{ duration: reduceMotion ? 0.1 : motionTokens.duration.normal, ease: motionTokens.easing.smooth }}
+          className="space-y-4"
+        >
+        {activeView === "customers" ? (
+          <CustomersView
+            record={record}
+            publicLink={publicLink}
+            score={score}
+            recommendationCount={recommendations.length}
+            newCompany={newCompany}
+            setNewCompany={setNewCompany}
+            createLink={createLink}
+            deleteSelectedAssessment={deleteSelectedAssessment}
+            onSaved={onSaved}
+          />
+        ) : null}
         {activeView === "results" ? (
           <>
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-4">
               <MetricTile label="Overall score" value={`${score.overallScore}/100`} detail={score.maturityLevel} />
               <MetricTile label="Completion" value={`${score.completion}%`} detail="Answered control coverage" />
               <MetricTile label="Critical findings" value={`${criticalRecommendations}`} detail="Immediate governance focus" />
-              <MetricTile label="Report status" value={reportReady ? "Ready" : reportProcessing ? "Processing" : "Not started"} detail={reportReady ? "PDF can be downloaded" : "Generated after completion"} />
+              <MetricTile label="Report status" value={reportReady ? "Ready" : reportProcessing ? "Yorumlanıyor" : "Not started"} detail={reportReady ? "PDF can be downloaded" : "Generated after completion"} />
             </div>
             <div className="grid grid-cols-1 gap-4 2xl:grid-cols-[280px_minmax(0,1fr)_minmax(0,1fr)]">
               <div className="panel p-4">
@@ -351,14 +356,12 @@ function AdminWorkspace({
         {activeView === "recommendations" ? <RecommendationsView recommendations={recommendations} /> : null}
         {activeView === "roadmap" ? <RoadmapView roadmap={roadmap} /> : null}
         {activeView === "reports" ? <ReportsView record={record} reportReady={reportReady} reportProcessing={reportProcessing} onRefresh={onSaved} /> : null}
-        {activeView === "ai" ? <AISummaryView record={record} reportReady={reportReady} reportProcessing={reportProcessing} /> : null}
+        {activeView === "summary" ? <AISummaryView record={record} reportReady={reportReady} reportProcessing={reportProcessing} /> : null}
         {activeView === "assessment" || activeView === "profile" ? (
-          <div className="panel p-4">
-            <h2 className="mb-3 text-sm font-semibold">{activeView === "profile" ? "Organization profile review" : "Assessment workspace"}</h2>
-            <p className="text-sm leading-6 text-muted">Sol paneldeki form üzerinden kurum bilgileri ve kontrol cevapları aynı token üzerinde güncellenir. Assessment tamamlandığında AI yorumlama ve PDF hazırlama süreci başlatılır.</p>
-          </div>
+          <AssessmentEditor token={record.token} initialProfile={record.organization} initialAnswers={record.answers} onSaved={onSaved} />
         ) : null}
-      </section>
+        </motion.section>
+      </AnimatePresence>
     </div>
   );
 }
@@ -369,6 +372,133 @@ function MetricTile({ label, value, detail }: { label: string; value: string; de
       <div className="text-xs font-semibold text-muted">{label}</div>
       <div className="mt-1 text-xl font-semibold text-ink">{value}</div>
       {detail ? <div className="mt-1 text-xs leading-5 text-muted">{detail}</div> : null}
+    </div>
+  );
+}
+
+function CustomersView({
+  record,
+  publicLink,
+  score,
+  recommendationCount,
+  newCompany,
+  setNewCompany,
+  createLink,
+  deleteSelectedAssessment,
+  onSaved
+}: {
+  record: AssessmentRecord;
+  publicLink: string;
+  score: ReturnType<typeof calculateAssessment>;
+  recommendationCount: number;
+  newCompany: { companyName: string; sector: string };
+  setNewCompany: (value: { companyName: string; sector: string }) => void;
+  createLink: () => Promise<void>;
+  deleteSelectedAssessment: () => Promise<void>;
+  onSaved: () => Promise<void>;
+}) {
+  const [selectedProfile, setSelectedProfile] = useState({
+    companyName: record.organization.companyName,
+    sector: record.organization.sector
+  });
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+
+  useEffect(() => {
+    setSelectedProfile({
+      companyName: record.organization.companyName,
+      sector: record.organization.sector
+    });
+    setSaveState("idle");
+  }, [record.token, record.organization.companyName, record.organization.sector]);
+
+  async function copyLink() {
+    await navigator.clipboard.writeText(publicLink);
+  }
+
+  async function saveSelectedCustomer() {
+    setSaveState("saving");
+    const response = await fetch(`/api/assessments/token/${record.token}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        organization: selectedProfile,
+        answers: record.answers,
+        status: record.status === "Draft" ? "InProgress" : record.status
+      })
+    });
+    if (!response.ok) {
+      setSaveState("error");
+      return;
+    }
+    await onSaved();
+    setSaveState("saved");
+  }
+
+  return (
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="panel p-4">
+        <div className="mb-4">
+          <h2 className="text-sm font-semibold">Customer workspace</h2>
+          <p className="mt-1 text-xs leading-5 text-muted">Müşteri token oluşturma, link paylaşımı ve kayıt yönetimi bu ekrandan yürütülür.</p>
+        </div>
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <label className="text-xs font-semibold text-muted">
+            Company name
+            <input className="focus-ring mt-1 w-full rounded-md border border-line px-3 py-2 text-sm font-medium text-ink" value={newCompany.companyName} onChange={(event) => setNewCompany({ ...newCompany, companyName: event.target.value })} />
+          </label>
+          <label className="text-xs font-semibold text-muted">
+            Sector
+            <input className="focus-ring mt-1 w-full rounded-md border border-line px-3 py-2 text-sm font-medium text-ink" value={newCompany.sector} onChange={(event) => setNewCompany({ ...newCompany, sector: event.target.value })} />
+          </label>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <motion.button
+            onClick={() => void createLink()}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
+            className="focus-ring flex items-center gap-2 rounded-md bg-teal px-3 py-2 text-sm font-semibold text-white"
+          >
+            <Plus size={16} /> Create token link
+          </motion.button>
+          <button onClick={() => void deleteSelectedAssessment()} className="focus-ring flex items-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-danger"><Trash2 size={16} /> Delete selected</button>
+        </div>
+        <div className="mt-6 border-t border-line pt-5">
+          <h3 className="text-sm font-semibold text-ink">Edit selected customer</h3>
+          <p className="mt-1 text-xs leading-5 text-muted">Seçili token üzerindeki müşteri adı ve sektör bilgisini hızlıca güncelleyebilirsiniz.</p>
+          <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
+            <label className="text-xs font-semibold text-muted">
+              Customer name
+              <input className="focus-ring mt-1 w-full rounded-md border border-line px-3 py-2 text-sm font-medium text-ink" value={selectedProfile.companyName} onChange={(event) => setSelectedProfile({ ...selectedProfile, companyName: event.target.value })} />
+            </label>
+            <label className="text-xs font-semibold text-muted">
+              Sector
+              <input className="focus-ring mt-1 w-full rounded-md border border-line px-3 py-2 text-sm font-medium text-ink" value={selectedProfile.sector} onChange={(event) => setSelectedProfile({ ...selectedProfile, sector: event.target.value })} />
+            </label>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button onClick={() => void saveSelectedCustomer()} disabled={saveState === "saving"} className="focus-ring rounded-md bg-ink px-3 py-2 text-sm font-semibold text-white disabled:cursor-wait disabled:opacity-60">{saveState === "saving" ? "Saving..." : "Save customer"}</button>
+            {saveState === "saved" ? <span className="text-xs font-semibold text-teal">Saved</span> : null}
+            {saveState === "error" ? <span className="text-xs font-semibold text-danger">Kaydedilemedi</span> : null}
+          </div>
+        </div>
+        <div className="mt-5 rounded-md border border-line bg-wash p-3">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <div className="text-xs font-semibold text-muted">Active customer link</div>
+            <span className="rounded bg-white px-2 py-1 text-xs font-semibold text-muted">{record.status}</span>
+          </div>
+          <div className="break-all text-xs leading-5 text-ink">{publicLink}</div>
+          <button onClick={copyLink} className="focus-ring mt-3 flex w-full items-center justify-center gap-2 rounded-md bg-ink px-3 py-2 text-sm font-semibold text-white"><Clipboard size={16} /> Copy customer link</button>
+        </div>
+      </div>
+      <div className="panel p-4">
+        <h3 className="mb-3 text-sm font-semibold">Assessment summary</h3>
+        <div className="grid grid-cols-2 gap-2">
+          <MetricTile label="Status" value={record.status} />
+          <MetricTile label="Completion" value={`${score.completion}%`} />
+          <MetricTile label="Score" value={`${score.overallScore}/100`} />
+          <MetricTile label="Findings" value={`${recommendationCount}`} />
+        </div>
+      </div>
     </div>
   );
 }
@@ -464,7 +594,7 @@ function ReportsView({ record, reportReady, reportProcessing, onRefresh }: { rec
               <span className="h-3 w-3 animate-pulse rounded-full bg-amber" />
               <div>
                 <div className="text-sm font-semibold text-ink">PDF rapor hazırlanıyor</div>
-                <div className="mt-1 text-xs leading-5 text-muted">AI yorumlama ve PDF üretim işlemi devam ediyor. Tahmini hazır olma zamanı: {readyAt || "assessment tamamlandıktan sonra planlanır"}.</div>
+                <div className="mt-1 text-xs leading-5 text-muted">Rapor yorumlanıyor ve PDF hazırlanıyor. Tahmini hazır olma zamanı: {readyAt || "assessment tamamlandıktan sonra planlanır"}.</div>
               </div>
             </div>
           </div>
@@ -479,7 +609,8 @@ function ReportsView({ record, reportReady, reportProcessing, onRefresh }: { rec
           <ReportAction icon={FileText} title="HTML preview" description="Canlı rapor önizlemesi" href={`/api/export/${record.token}/html`} />
           <ReportAction icon={FileDown} title="Markdown export" description="Danışman düzenlemesi için metin çıktı" href={`/api/export/${record.token}/markdown`} />
           <ReportAction icon={Activity} title="JSON export" description="Skor, cevap ve öneri verisi" href={`/api/export/${record.token}/json`} />
-          <ReportAction icon={Download} title="Executive PDF" description={reportReady ? "AI yorumu ve PDF hazır" : reportProcessing ? "Hazırlanıyor, lütfen daha sonra tekrar kontrol edin" : "Assessment tamamlandıktan sonra hazırlanır"} href={reportReady ? `/api/export/${record.token}/pdf` : undefined} disabled={!reportReady} busy={reportProcessing} />
+          <ReportAction icon={Clipboard} title="Jira issue export" description="Önerileri Jira import CSV formatında indir" href={`/api/export/${record.token}/jira`} />
+          <ReportAction icon={Download} title="Executive PDF" description={reportReady ? "Yorum ve PDF hazır" : reportProcessing ? "Yorumlanıyor, lütfen daha sonra tekrar kontrol edin" : "Assessment tamamlandıktan sonra hazırlanır"} href={reportReady ? `/api/export/${record.token}/pdf` : undefined} disabled={!reportReady} busy={reportProcessing} />
         </div>
       </div>
     </div>
@@ -507,7 +638,7 @@ function AISummaryView({ record, reportReady, reportProcessing }: { record: Asse
       <div className="panel p-4">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold">AI Summary</h2>
+            <h2 className="text-sm font-semibold">Summary</h2>
             <p className="mt-1 text-xs leading-5 text-muted">Assessment tamamlandıktan sonra aynı token üzerinde yorumlama başlar. Sayfa yenilendiğinde hazır durumdaysa özet ve PDF indirme aktif olur.</p>
           </div>
           <span className={`rounded px-2 py-1 text-xs font-semibold ${reportReady ? "bg-teal/10 text-teal" : reportProcessing ? "bg-amber/10 text-amber" : "bg-wash text-muted"}`}>
@@ -515,7 +646,7 @@ function AISummaryView({ record, reportReady, reportProcessing }: { record: Asse
           </span>
         </div>
         <div className="rounded-md border border-line bg-wash p-4 text-sm leading-6 text-ink">
-          {record.aiSummary ?? (reportProcessing ? `AI yorumu hazırlanıyor. Tahmini hazır olma zamanı: ${readyAt}.` : "Complete assessment sonrası AI yorumlama ve PDF hazırlama süreci başlar.")}
+          {record.aiSummary ?? (reportProcessing ? `Yorumlanıyor. Tahmini hazır olma zamanı: ${readyAt}.` : "Complete assessment sonrası yorumlama ve PDF hazırlama süreci başlar.")}
         </div>
       </div>
       <div className="panel p-4">
