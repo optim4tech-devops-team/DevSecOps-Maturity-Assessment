@@ -80,22 +80,22 @@ function drawCoverPage(doc: PdfDoc, profile: OrganizationProfile, score: Assessm
 
   drawPanel(doc, 56, 298, 508, 178, "Executive priorities");
   recommendations.slice(0, 3).forEach((item, index) => {
-    const y = 432 - index * 48;
-    drawPill(doc, 78, y + 3, 42, 18, item.priority, priorityColor(item.priority));
-    text(doc, item.title, 134, y + 7, 12, "bold", ...ink);
-    wrapText(doc, item.expectedImpact || item.description, 134, y - 10, 360, 9.5, 12, "regular", ...slate, 2);
+    const y = 418 - index * 46;
+    drawPill(doc, 88, y + 3, 42, 18, item.priority, priorityColor(item.priority));
+    text(doc, item.title, 148, y + 7, 12, "bold", ...ink);
+    wrapText(doc, item.expectedImpact || item.description, 148, y - 10, 360, 9.5, 12, "regular", ...slate, 2);
   });
 
   drawPanel(doc, 608, 298, 526, 178, "Primary risk concentration");
   lowCategories.forEach((item, index) => {
-    const y = 428 - index * 30;
-    text(doc, compactName(item.category.name), 632, y + 2, 10.2, "bold", ...ink);
-    drawProgressBar(doc, 834, y, 202, 10, item.score, scoreColor(item.score));
-    text(doc, `%${item.score}`, 1050, y - 1, 9.8, "bold", ...ink);
+    const y = 418 - index * 28;
+    text(doc, compactName(item.category.name), 640, y + 2, 10.2, "bold", ...ink);
+    drawProgressBar(doc, 850, y, 202, 10, item.score, scoreColor(item.score));
+    text(doc, `%${item.score}`, 1066, y - 1, 9.8, "bold", ...ink);
   });
 
   drawPanel(doc, 56, 108, 1078, 150, "Assessment scope");
-  drawProfileGrid(doc, profile, 82, 212);
+  drawProfileGrid(doc, profile, 88, 204);
   drawFooterNote(doc, "Report is generated from local assessment data and deterministic rule outputs. No external service is required for PDF creation.");
 }
 
@@ -109,12 +109,12 @@ function drawMaturityPage(doc: PdfDoc, profile: OrganizationProfile, score: Asse
   drawPanel(doc, 414, 560, 720, 176, "Top maturity domains");
   categories.slice(0, 5).forEach((item, index) => {
     const x = 440 + index * 136;
-    drawVerticalScore(doc, x, 594, 92, item.score, compactName(item.category.name));
+    drawVerticalScore(doc, x, 594, 76, item.score, compactName(item.category.name));
   });
 
   drawPanel(doc, 56, 278, 508, 236, "Domain score distribution");
   categories.slice(0, 10).forEach((item, index) => {
-    const y = 476 - index * 21;
+    const y = 456 - index * 18.5;
     text(doc, compactName(item.category.name), 84, y + 2, 9.3, "bold", ...ink);
     drawProgressBar(doc, 284, y, 206, 9, item.score, scoreColor(item.score));
     text(doc, `%${item.score}`, 506, y - 1, 9.2, "bold", ...ink);
@@ -122,28 +122,28 @@ function drawMaturityPage(doc: PdfDoc, profile: OrganizationProfile, score: Asse
 
   drawPanel(doc, 608, 278, 526, 236, "Improvement focus");
   lowCategories.forEach((item, index) => {
-    const y = 470 - index * 38;
+    const y = 450 - index * 38;
     drawRiskBand(doc, 632, y - 2, item.score);
     text(doc, compactName(item.category.name), 710, y + 5, 10.8, "bold", ...ink);
     wrapText(doc, item.category.description || "Target operating model and evidence maturity should be improved.", 710, y - 11, 338, 8.8, 11, "regular", ...slate, 2);
   });
 
   drawPanel(doc, 56, 106, 1078, 126, "Operating model signal");
-  drawGovernanceBand(doc, 84, 184, score);
-  drawSignalCard(doc, 84, 142, "Release control", findScore(categories, "release"), "Approval, rollback and evidence controls");
-  drawSignalCard(doc, 344, 142, "CI quality", findScore(categories, "ci"), "Build, test and quality gate automation");
-  drawSignalCard(doc, 604, 142, "Security posture", findScore(categories, "devsecops"), "SAST, SCA, DAST, secret and runtime controls");
-  drawSignalCard(doc, 864, 142, "Observability", findScore(categories, "observability"), "Monitoring, logging, SLO and incident visibility");
+  drawGovernanceBand(doc, 84, 168, score);
+  drawSignalCard(doc, 84, 116, "Release control", findScore(categories, "release"), "Approval, rollback and evidence controls");
+  drawSignalCard(doc, 344, 116, "CI quality", findScore(categories, "ci"), "Build, test and quality gate automation");
+  drawSignalCard(doc, 604, 116, "Security posture", findScore(categories, "devsecops"), "SAST, SCA, DAST, secret and runtime controls");
+  drawSignalCard(doc, 864, 116, "Observability", findScore(categories, "observability"), "Monitoring, logging, SLO and incident visibility");
 }
 
 function drawRecommendationsPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[]) {
   drawShell(doc, "Recommendations", `${profile.companyName} - prioritized improvement backlog`, 3);
 
   drawPanel(doc, 56, 596, 1078, 140, "Executive narrative");
-  drawDecisionBadge(doc, 84, 638, score);
-  wrapText(doc, buildDeterministicSummary(profile, score, recommendations), 194, 690, 624, 12, 16, "regular", ...ink, 4);
-  drawKpiCard(doc, 864, 632, 112, 58, "P1", String(recommendations.filter((item) => item.priority === "P1").length), "Immediate", red);
-  drawKpiCard(doc, 994, 632, 112, 58, "P2/P3", String(recommendations.filter((item) => item.priority !== "P1").length), "Planned", amber);
+  drawDecisionBadge(doc, 84, 626, score);
+  wrapText(doc, buildDeterministicSummary(profile, score, recommendations), 194, 680, 624, 12, 16, "regular", ...ink, 4);
+  drawKpiCard(doc, 864, 624, 112, 58, "P1", String(recommendations.filter((item) => item.priority === "P1").length), "Immediate", red);
+  drawKpiCard(doc, 994, 624, 112, 58, "P2/P3", String(recommendations.filter((item) => item.priority !== "P1").length), "Planned", amber);
 
   drawPanel(doc, 56, 124, 1078, 426, "Prioritized action register");
   drawTableHeader(doc, 80, 486);
@@ -162,14 +162,14 @@ function drawRoadmapPage(doc: PdfDoc, profile: OrganizationProfile, score: Asses
 
   drawPanel(doc, 56, 248, 1078, 264, "90 day roadmap");
   roadmap.forEach((phase, index) => {
-    drawRoadmapColumn(doc, 90 + index * 348, 282, 306, 190, phase, index);
+    drawRoadmapColumn(doc, 90 + index * 348, 270, 306, 190, phase, index);
   });
 
   drawPanel(doc, 56, 106, 516, 96, "Release governance");
-  wrapText(doc, "Every completed assessment keeps the same token. When scoring is completed, the report status changes to processing; users can refresh later and download the PDF when it is ready.", 84, 168, 422, 10.8, 15, "regular", ...slate, 4);
+  wrapText(doc, "Every completed assessment keeps the same token. When scoring is completed, the report status changes to processing; users can refresh later and download the PDF when it is ready.", 84, 150, 422, 10.8, 15, "regular", ...slate, 4);
 
   drawPanel(doc, 618, 106, 516, 96, "Generation approach");
-  wrapText(doc, "PDF creation runs inside the application without an external AI dependency. A separate PDF pod can be introduced later only if branded HTML rendering, custom fonts or large batch generation becomes necessary.", 646, 168, 422, 10.8, 15, "regular", ...slate, 4);
+  wrapText(doc, "PDF creation runs inside the application without an external AI dependency. A separate PDF pod can be introduced later only if branded HTML rendering, custom fonts or large batch generation becomes necessary.", 646, 150, 422, 10.8, 15, "regular", ...slate, 4);
 
   text(doc, `Board signal: %${score.overallScore} - ${scoreLabel(score.overallScore)}`, 56, 62, 12, "bold", ...navy);
   text(doc, `Open recommendation count: ${recommendations.length}`, 888, 62, 12, "bold", ...navy);
