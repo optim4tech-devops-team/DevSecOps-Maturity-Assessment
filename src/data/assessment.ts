@@ -30,6 +30,7 @@ export type Question = {
 export type OrganizationProfile = {
   companyName: string;
   sector: string;
+  industrySubtype?: string;
   employeeCount: number;
   developerCount: number;
   devopsEngineerCount: number;
@@ -60,6 +61,7 @@ export const questions: Question[] = typedAssessmentBank.questions;
 export const defaultProfile: OrganizationProfile = {
   companyName: "Optim4Tech Demo",
   sector: "Technology",
+  industrySubtype: "",
   employeeCount: 420,
   developerCount: 85,
   devopsEngineerCount: 9,

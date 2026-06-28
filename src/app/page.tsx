@@ -647,11 +647,15 @@ function ReportsView({ record, reportReady, reportProcessing, onRefresh }: { rec
           <div className="mb-4 rounded-md border border-teal/30 bg-teal/5 p-4 text-sm font-semibold text-teal">PDF rapor hazır. Executive PDF kartından indirebilirsiniz.</div>
         ) : null}
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <ReportAction icon={FileText} title="HTML preview" description="Canlı rapor önizlemesi" href={`/api/export/${record.token}/html`} />
-          <ReportAction icon={FileDown} title="Markdown export" description="Danışman düzenlemesi için metin çıktı" href={`/api/export/${record.token}/markdown`} />
-          <ReportAction icon={Activity} title="JSON export" description="Skor, cevap ve öneri verisi" href={`/api/export/${record.token}/json`} />
+          <ReportAction icon={FileText} title="HTML preview - Türkçe" description="Canlı rapor önizlemesi" href={`/api/export/${record.token}/html?lang=tr`} />
+          <ReportAction icon={FileText} title="HTML preview - English" description="English live report preview" href={`/api/export/${record.token}/html?lang=en`} />
+          <ReportAction icon={FileDown} title="Markdown export - Türkçe" description="Danışman düzenlemesi için metin çıktı" href={`/api/export/${record.token}/markdown?lang=tr`} />
+          <ReportAction icon={FileDown} title="Markdown export - English" description="Editable English text export" href={`/api/export/${record.token}/markdown?lang=en`} />
+          <ReportAction icon={Activity} title="JSON export - Türkçe" description="Skor, cevap ve öneri verisi" href={`/api/export/${record.token}/json?lang=tr`} />
+          <ReportAction icon={Activity} title="JSON export - English" description="Score, answers and recommendations data" href={`/api/export/${record.token}/json?lang=en`} />
           <ReportAction icon={Clipboard} title="Jira issue export" description="Önerileri Jira import CSV formatında indir" href={`/api/export/${record.token}/jira`} />
-          <ReportAction icon={Download} title="Executive PDF" description={reportReady ? "Yorum ve PDF hazır" : reportProcessing ? "Yorumlanıyor, lütfen daha sonra tekrar kontrol edin" : "Assessment tamamlandıktan sonra hazırlanır"} href={reportReady ? `/api/export/${record.token}/pdf` : undefined} disabled={!reportReady} busy={reportProcessing} />
+          <ReportAction icon={Download} title="Executive PDF - Türkçe" description={reportReady ? "Türkçe PDF hazır" : reportProcessing ? "Yorumlanıyor, lütfen daha sonra tekrar kontrol edin" : "Assessment tamamlandıktan sonra hazırlanır"} href={reportReady ? `/api/export/${record.token}/pdf?lang=tr` : undefined} disabled={!reportReady} busy={reportProcessing} />
+          <ReportAction icon={Download} title="Executive PDF - English" description={reportReady ? "English PDF is ready" : reportProcessing ? "Processing, please refresh later" : "Available after assessment completion"} href={reportReady ? `/api/export/${record.token}/pdf?lang=en` : undefined} disabled={!reportReady} busy={reportProcessing} />
         </div>
       </div>
     </div>
@@ -700,7 +704,12 @@ function AISummaryView({ record, reportReady, reportProcessing }: { record: Asse
               <div className="text-xs text-muted">{record.reportGeneratedAt ? new Date(record.reportGeneratedAt).toLocaleString("tr-TR") : readyAt || "Complete sonrası planlanır"}</div>
             </div>
           </div>
-          {reportReady ? <a href={`/api/export/${record.token}/pdf`} className="focus-ring flex w-full items-center justify-center gap-2 rounded-md bg-ink px-3 py-2 text-sm font-semibold text-white"><Download size={16} /> Download PDF</a> : <button disabled className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-md border border-line bg-wash px-3 py-2 text-sm font-semibold text-muted">{reportProcessing ? <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-amber" /> : null} {reportProcessing ? "PDF preparing" : "PDF not ready"}</button>}
+          {reportReady ? (
+            <div className="grid grid-cols-1 gap-2">
+              <a href={`/api/export/${record.token}/pdf?lang=tr`} className="focus-ring flex w-full items-center justify-center gap-2 rounded-md bg-ink px-3 py-2 text-sm font-semibold text-white"><Download size={16} /> Türkçe PDF</a>
+              <a href={`/api/export/${record.token}/pdf?lang=en`} className="focus-ring flex w-full items-center justify-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink"><Download size={16} /> English PDF</a>
+            </div>
+          ) : <button disabled className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-md border border-line bg-wash px-3 py-2 text-sm font-semibold text-muted">{reportProcessing ? <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-amber" /> : null} {reportProcessing ? "PDF preparing" : "PDF not ready"}</button>}
         </div>
       </div>
     </div>

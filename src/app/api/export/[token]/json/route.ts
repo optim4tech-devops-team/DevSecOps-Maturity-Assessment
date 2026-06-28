@@ -2,20 +2,26 @@ import { NextResponse } from "next/server";
 import { getAssessmentByToken } from "@/lib/db";
 import { calculateAssessment } from "@/features/scoring/scoring";
 import { generateRecommendations } from "@/features/recommendations/recommendations";
-import { buildReportPayload } from "@/features/reports/report";
+import { buildReportPayload, ReportLanguage } from "@/features/reports/report";
 
-export async function GET(_: Request, { params }: { params: Promise<{ token: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
+  const language = getLanguage(request);
   const record = await getAssessmentByToken(token);
   if (!record) return NextResponse.json({ message: "Assessment not found" }, { status: 404 });
 
   const score = record.score ?? calculateAssessment(record.answers);
   const recommendations = record.recommendations ?? generateRecommendations(record.answers, score.categoryScores);
-  const fileName = `${record.organization.companyName.replaceAll(" ", "-").toLowerCase()}-assessment.json`;
+  const fileName = `${record.organization.companyName.replaceAll(" ", "-").toLowerCase()}-assessment-${language}.json`;
 
-  return NextResponse.json(buildReportPayload(record.organization, score, recommendations, record.answers), {
+  return NextResponse.json(buildReportPayload(record.organization, score, recommendations, record.answers, language), {
     headers: {
       "content-disposition": `attachment; filename="${fileName}"`
     }
   });
+}
+
+function getLanguage(request: Request): ReportLanguage {
+  const value = new URL(request.url).searchParams.get("lang");
+  return value === "en" ? "en" : "tr";
 }

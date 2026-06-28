@@ -224,10 +224,14 @@ function CustomerReports({ record, reportReady, reportProcessing, onRefresh }: {
         </div>
       ) : null}
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        <CustomerReportAction icon={FileText} title="HTML result" description="Canlı rapor önizlemesi" href={`/api/export/${record.token}/html`} />
-        <CustomerReportAction icon={Activity} title="JSON result" description="Skor, cevap ve öneri verisi" href={`/api/export/${record.token}/json`} />
-        <CustomerReportAction icon={FileDown} title="Markdown result" description="Metin formatında rapor çıktısı" href={`/api/export/${record.token}/markdown`} />
-        <CustomerReportAction icon={Download} title="PDF result" description={reportReady ? "Executive PDF hazır" : reportProcessing ? "Yorumlanıyor, lütfen daha sonra yenileyin" : "Assessment tamamlandıktan sonra hazırlanır"} href={reportReady ? `/api/export/${record.token}/pdf` : undefined} disabled={!reportReady} busy={reportProcessing} />
+        <CustomerReportAction icon={FileText} title="HTML result - Türkçe" description="Canlı rapor önizlemesi" href={`/api/export/${record.token}/html?lang=tr`} />
+        <CustomerReportAction icon={FileText} title="HTML result - English" description="English live report preview" href={`/api/export/${record.token}/html?lang=en`} />
+        <CustomerReportAction icon={Activity} title="JSON result - Türkçe" description="Skor, cevap ve öneri verisi" href={`/api/export/${record.token}/json?lang=tr`} />
+        <CustomerReportAction icon={Activity} title="JSON result - English" description="Score, answers and recommendations data" href={`/api/export/${record.token}/json?lang=en`} />
+        <CustomerReportAction icon={FileDown} title="Markdown result - Türkçe" description="Metin formatında rapor çıktısı" href={`/api/export/${record.token}/markdown?lang=tr`} />
+        <CustomerReportAction icon={FileDown} title="Markdown result - English" description="Editable English report output" href={`/api/export/${record.token}/markdown?lang=en`} />
+        <CustomerReportAction icon={Download} title="PDF result - Türkçe" description={reportReady ? "Türkçe executive PDF hazır" : reportProcessing ? "Yorumlanıyor, lütfen daha sonra yenileyin" : "Assessment tamamlandıktan sonra hazırlanır"} href={reportReady ? `/api/export/${record.token}/pdf?lang=tr` : undefined} disabled={!reportReady} busy={reportProcessing} />
+        <CustomerReportAction icon={Download} title="PDF result - English" description={reportReady ? "English executive PDF is ready" : reportProcessing ? "Processing, please refresh later" : "Available after assessment completion"} href={reportReady ? `/api/export/${record.token}/pdf?lang=en` : undefined} disabled={!reportReady} busy={reportProcessing} />
         <CustomerReportAction icon={Clipboard} title="Jira issue export" description="Önerileri Jira import CSV olarak indir" href={`/api/export/${record.token}/jira`} />
         <CustomerReportAction icon={Clock3} title="Report status" description={record.reportGeneratedAt ? new Date(record.reportGeneratedAt).toLocaleString("tr-TR") : readyAt || "Henüz hazır değil"} />
       </div>

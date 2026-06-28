@@ -1,6 +1,8 @@
 import { Answers, OrganizationProfile } from "@/data/assessment";
 import { AssessmentScore, CategoryScore } from "@/features/scoring/scoring";
 import { buildRoadmap, Recommendation } from "@/features/recommendations/recommendations";
+import { buildBddkCompliance } from "@/features/compliance/bddk";
+import { buildReportInsightBullets, ReportLanguage } from "@/features/reports/report";
 
 type PdfPage = {
   width: number;
@@ -35,29 +37,35 @@ const reportBrand = "Optim4Tech Advisory";
 const reportClassification = "Confidential";
 const reportVersion = "Assessment Pack v1.0";
 
-export function generateExecutivePdfReport(profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[], answers: Answers) {
+export function generateExecutivePdfReport(profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[], answers: Answers, language: ReportLanguage = "tr") {
   const doc = createDoc();
   const sortedCategories = [...score.categoryScores].sort((a, b) => b.score - a.score);
   const lowCategories = [...score.categoryScores].sort((a, b) => a.score - b.score).slice(0, 5);
   const roadmap = buildRoadmap(recommendations);
+  const compliance = buildBddkCompliance(profile, answers);
   const evidenceCount = Object.values(answers).filter((value) => {
     if (Array.isArray(value)) return value.length > 0;
     return value !== undefined && value !== null && String(value).trim() !== "" && String(value) !== "0";
   }).length;
 
-  drawCoverPage(doc, profile, score, recommendations, lowCategories, evidenceCount);
+  drawCoverPage(doc, profile, score, recommendations, lowCategories, evidenceCount, language);
   addPage(doc);
-  drawMaturityPage(doc, profile, score, sortedCategories, lowCategories);
+  drawMaturityPage(doc, profile, score, sortedCategories, lowCategories, language);
   addPage(doc);
-  drawRecommendationsPage(doc, profile, score, recommendations);
+  drawRecommendationsPage(doc, profile, score, recommendations, language);
   addPage(doc);
-  drawRoadmapPage(doc, profile, score, recommendations, roadmap);
+  drawRoadmapPage(doc, profile, score, recommendations, roadmap, language);
+  if (compliance.active) {
+    addPage(doc);
+    drawCompliancePage(doc, profile, compliance, language);
+  }
 
   return Buffer.from(renderPdf(doc));
 }
 
-function drawCoverPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[], lowCategories: CategoryScore[], evidenceCount: number) {
-  drawShell(doc, "Executive Assessment Report", "SDLC, DevOps and DevSecOps maturity assessment", 1);
+function drawCoverPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[], lowCategories: CategoryScore[], evidenceCount: number, language: ReportLanguage) {
+  const copy = pdfCopy(language);
+  drawShell(doc, copy.coverTitle, copy.coverSubtitle, 1, language);
   fill(doc, 0, 640, pageWidth, 202, ...navy);
   fill(doc, 0, 640, pageWidth, 202, 4, 18, 40);
   fill(doc, 0, 640, 322, 202, 8, 38, 78);
@@ -66,19 +74,19 @@ function drawCoverPage(doc: PdfDoc, profile: OrganizationProfile, score: Assessm
   text(doc, reportClassification.toUpperCase(), 68, 808, 7.5, "bold", 255, 255, 255);
   text(doc, reportBrand, 192, 807, 8.5, "bold", 190, 220, 235);
   text(doc, profile.companyName, 56, 776, 30, "bold", 255, 255, 255);
-  text(doc, "SDLC & DevSecOps Maturity Assessment", 56, 738, 20, "bold", 177, 232, 240);
-  wrapText(doc, buildExecutiveVerdict(profile, score, recommendations), 56, 704, 610, 13, 18, "regular", 232, 240, 248, 2);
+  text(doc, copy.coverSubtitle, 56, 738, 20, "bold", 177, 232, 240);
+  wrapText(doc, buildExecutiveVerdict(profile, score, recommendations, language), 56, 704, 610, 13, 18, "regular", 232, 240, 248, 2);
   drawCoverMetadata(doc, profile, 56, 644);
 
   drawScoreDial(doc, 908, 724, 76, score.overallScore, scoreLabel(score.overallScore));
   drawMaturityLegend(doc, 1010, 776);
 
-  drawKpiCard(doc, 56, 514, 238, 92, "Overall score", `%${score.overallScore}`, scoreLabel(score.overallScore), scoreColor(score.overallScore));
-  drawKpiCard(doc, 316, 514, 238, 92, "Maturity level", levelShort(score.maturityLevel), "Assessment classification", blue);
-  drawKpiCard(doc, 576, 514, 238, 92, "Open recommendations", String(recommendations.length), "Prioritized actions", severityColor(recommendations[0]?.severity));
-  drawKpiCard(doc, 836, 514, 238, 92, "Answered evidence", String(evidenceCount), "Collected assessment inputs", purple);
+  drawKpiCard(doc, 56, 514, 238, 92, copy.overallScore, `%${score.overallScore}`, scoreLabel(score.overallScore), scoreColor(score.overallScore));
+  drawKpiCard(doc, 316, 514, 238, 92, copy.maturityLevel, levelShort(score.maturityLevel), copy.assessmentClassification, blue);
+  drawKpiCard(doc, 576, 514, 238, 92, copy.openRecommendations, String(recommendations.length), copy.prioritizedActions, severityColor(recommendations[0]?.severity));
+  drawKpiCard(doc, 836, 514, 238, 92, copy.answeredEvidence, String(evidenceCount), copy.collectedInputs, purple);
 
-  drawPanel(doc, 56, 298, 508, 178, "Executive priorities");
+  drawPanel(doc, 56, 298, 508, 178, copy.executivePriorities);
   recommendations.slice(0, 3).forEach((item, index) => {
     const y = 418 - index * 46;
     drawPill(doc, 88, y + 3, 42, 18, item.priority, priorityColor(item.priority));
@@ -86,7 +94,7 @@ function drawCoverPage(doc: PdfDoc, profile: OrganizationProfile, score: Assessm
     wrapText(doc, item.expectedImpact || item.description, 148, y - 10, 360, 9.5, 12, "regular", ...slate, 2);
   });
 
-  drawPanel(doc, 608, 298, 526, 178, "Primary risk concentration");
+  drawPanel(doc, 608, 298, 526, 178, copy.riskConcentration);
   lowCategories.forEach((item, index) => {
     const y = 418 - index * 28;
     text(doc, compactName(item.category.name), 640, y + 2, 10.2, "bold", ...ink);
@@ -94,13 +102,14 @@ function drawCoverPage(doc: PdfDoc, profile: OrganizationProfile, score: Assessm
     text(doc, `%${item.score}`, 1066, y - 1, 9.8, "bold", ...ink);
   });
 
-  drawPanel(doc, 56, 108, 1078, 150, "Assessment scope");
+  drawPanel(doc, 56, 108, 1078, 150, copy.assessmentScope);
   drawProfileGrid(doc, profile, 88, 204);
-  drawFooterNote(doc, "Report is generated from local assessment data and deterministic rule outputs. No external service is required for PDF creation.");
+  drawFooterNote(doc, copy.localGenerationNote);
 }
 
-function drawMaturityPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, categories: CategoryScore[], lowCategories: CategoryScore[]) {
-  drawShell(doc, "Maturity Scorecard", `${profile.companyName} - domain based maturity view`, 2);
+function drawMaturityPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, categories: CategoryScore[], lowCategories: CategoryScore[], language: ReportLanguage) {
+  const copy = pdfCopy(language);
+  drawShell(doc, copy.maturityScorecard, `${profile.companyName} - ${copy.domainView}`, 2, language);
 
   drawPanel(doc, 56, 560, 326, 176, "Score interpretation");
   drawScoreDial(doc, 216, 648, 58, score.overallScore, scoreLabel(score.overallScore));
@@ -136,12 +145,18 @@ function drawMaturityPage(doc: PdfDoc, profile: OrganizationProfile, score: Asse
   drawSignalCard(doc, 864, 116, "Observability", findScore(categories, "observability"), "Monitoring, logging, SLO and incident visibility");
 }
 
-function drawRecommendationsPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[]) {
-  drawShell(doc, "Recommendations", `${profile.companyName} - prioritized improvement backlog`, 3);
+function drawRecommendationsPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[], language: ReportLanguage) {
+  const copy = pdfCopy(language);
+  drawShell(doc, copy.recommendations, `${profile.companyName} - ${copy.prioritizedBacklog}`, 3, language);
+  const insightBullets = buildReportInsightBullets(profile, score, recommendations, language);
 
-  drawPanel(doc, 56, 596, 1078, 140, "Executive narrative");
+  drawPanel(doc, 56, 596, 1078, 140, copy.summaryInsights);
   drawDecisionBadge(doc, 84, 626, score);
-  wrapText(doc, buildDeterministicSummary(profile, score, recommendations), 194, 680, 624, 12, 16, "regular", ...ink, 4);
+  insightBullets.forEach((item, index) => {
+    const y = 682 - index * 32;
+    circle(doc, 194, y - 4, 5, ...cyan);
+    wrapText(doc, item, 210, y, 614, 9.8, 12.2, "regular", ...ink, 2);
+  });
   drawKpiCard(doc, 864, 624, 112, 58, "P1", String(recommendations.filter((item) => item.priority === "P1").length), "Immediate", red);
   drawKpiCard(doc, 994, 624, 112, 58, "P2/P3", String(recommendations.filter((item) => item.priority !== "P1").length), "Planned", amber);
 
@@ -154,8 +169,9 @@ function drawRecommendationsPage(doc: PdfDoc, profile: OrganizationProfile, scor
   drawFooterNote(doc, "Reports menu can also export the same action register as Jira issue CSV for backlog creation.");
 }
 
-function drawRoadmapPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[], roadmap: ReturnType<typeof buildRoadmap>) {
-  drawShell(doc, "Roadmap & Delivery Model", `${profile.companyName} - phased execution plan`, 4);
+function drawRoadmapPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[], roadmap: ReturnType<typeof buildRoadmap>, language: ReportLanguage) {
+  const copy = pdfCopy(language);
+  drawShell(doc, copy.roadmapTitle, `${profile.companyName} - ${copy.executionPlan}`, 4, language);
 
   drawPanel(doc, 56, 558, 1078, 178, "Assessment delivery flow");
   drawDeliveryFlow(doc, 92, 642);
@@ -175,6 +191,39 @@ function drawRoadmapPage(doc: PdfDoc, profile: OrganizationProfile, score: Asses
   text(doc, `Open recommendation count: ${recommendations.length}`, 888, 62, 12, "bold", ...navy);
 }
 
+function drawCompliancePage(doc: PdfDoc, profile: OrganizationProfile, compliance: ReturnType<typeof buildBddkCompliance>, language: ReportLanguage) {
+  const copy = pdfCopy(language);
+  drawShell(doc, copy.regulatoryAlignment, `${profile.companyName} - BDDK technical control signal`, 5, language);
+
+  drawPanel(doc, 56, 602, 1078, 134, "Mevzuat uyum özeti");
+  drawKpiCard(doc, 84, 630, 186, 58, "Overall signal", compliance.overallStatus, "Technical control view", compliance.overallStatus === "Gap" ? red : compliance.overallStatus === "Partial" ? amber : green);
+  drawKpiCard(doc, 292, 630, 128, 58, "Aligned", String(compliance.alignedCount), "Strong signal", green);
+  drawKpiCard(doc, 442, 630, 128, 58, "Partial", String(compliance.partialCount), "Needs evidence", amber);
+  drawKpiCard(doc, 592, 630, 128, 58, "Gap", String(compliance.gapCount), "Control gap", red);
+  wrapText(doc, compliance.disclaimer, 760, 674, 330, 9.8, 13, "regular", ...slate, 4);
+
+  drawPanel(doc, 56, 106, 1078, 450, "BDDK kontrol matrisi");
+  fill(doc, 84, 498, 1022, 28, ...deepBlue);
+  text(doc, "Mevzuat", 98, 508, 9, "bold", 255, 255, 255);
+  text(doc, "Kontrol", 220, 508, 9, "bold", 255, 255, 255);
+  text(doc, "Durum", 630, 508, 9, "bold", 255, 255, 255);
+  text(doc, "Kanıt / açık alan", 740, 508, 9, "bold", 255, 255, 255);
+
+  compliance.controls.slice(0, 8).forEach((control, index) => {
+    const y = 458 - index * 44;
+    fill(doc, 84, y, 1022, 40, index % 2 === 0 ? 255 : 248, index % 2 === 0 ? 255 : 250, index % 2 === 0 ? 255 : 253);
+    stroke(doc, 84, y, 1106, y, ...softLine);
+    wrapText(doc, `${control.source}\n${control.article}`, 98, y + 26, 92, 8, 10, "bold", ...ink, 2);
+    wrapText(doc, `${control.title}. ${control.summary}`, 220, y + 27, 362, 8.5, 10, "regular", ...ink, 3);
+    drawPill(doc, 630, y + 13, 76, 16, control.status, statusColor(control.status));
+    text(doc, `${control.score}/100`, 630, y + 5, 8, "bold", ...slate);
+    const evidence = control.gaps.length > 0 ? `Açık sinyal: ${control.gaps.join(", ")}` : `Kanıt: ${control.evidence.slice(0, 2).join(", ")}`;
+    wrapText(doc, evidence, 740, y + 27, 318, 8.2, 10, "regular", ...slate, 3);
+  });
+
+  drawFooterNote(doc, "BDDK section is generated from assessment answers; legal and audit teams should validate final regulatory interpretation.");
+}
+
 function createDoc(): PdfDoc {
   const page = { width: pageWidth, height: pageHeight, ops: [] };
   return { pages: [page], page };
@@ -186,7 +235,8 @@ function addPage(doc: PdfDoc) {
   doc.page = page;
 }
 
-function drawShell(doc: PdfDoc, title: string, subtitle: string, pageNumber: number) {
+function drawShell(doc: PdfDoc, title: string, subtitle: string, pageNumber: number, language: ReportLanguage = "tr") {
+  const copy = pdfCopy(language);
   fill(doc, 0, 0, pageWidth, pageHeight, 255, 255, 255);
   fill(doc, 0, 778, pageWidth, 64, ...navy);
   fill(doc, 0, 778, 360, 64, 8, 37, 76);
@@ -200,7 +250,7 @@ function drawShell(doc: PdfDoc, title: string, subtitle: string, pageNumber: num
   fill(doc, 0, 0, pageWidth, 38, 247, 249, 252);
   stroke(doc, 56, 38, 1134, 38, ...softLine);
   text(doc, `${reportClassification} - generated ${reportDateLabel()}`, 56, 18, 8.5, "bold", ...slate);
-  text(doc, "This document is intended for executive assessment and planning use.", 742, 18, 8.5, "regular", ...slate);
+  text(doc, copy.footerPurpose, 742, 18, 8.5, "regular", ...slate);
 }
 
 function drawPanel(doc: PdfDoc, x: number, y: number, w: number, h: number, title: string) {
@@ -406,9 +456,12 @@ function reportDateLabel() {
   return new Date().toLocaleDateString("tr-TR", { year: "numeric", month: "2-digit", day: "2-digit" });
 }
 
-function buildExecutiveVerdict(profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[]) {
+function buildExecutiveVerdict(profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[], language: ReportLanguage) {
   const critical = recommendations.filter((item) => item.severity === "Critical").length;
   const p1 = recommendations.filter((item) => item.priority === "P1").length;
+  if (language === "tr") {
+    return `${profile.companyName} assessment sonucu ${score.overallScore}/100 genel skor ile ${score.maturityLevel} seviyesindedir. Rapor; delivery governance, kalite kapıları, güvenlik kontrolleri ve operasyonel evidence alanlarında ${p1} acil aksiyon ve ${critical} kritik risk temasını önceliklendirir.`;
+  }
   return `${profile.companyName} assessment result indicates ${score.maturityLevel} maturity with an overall score of ${score.overallScore}/100. The report prioritizes ${p1} immediate actions and ${critical} critical risk themes across delivery governance, quality gates, security controls and operational evidence.`;
 }
 
@@ -457,6 +510,66 @@ function severityColor(severity?: Recommendation["severity"]): RGB {
   if (severity === "High") return [237, 110, 42];
   if (severity === "Medium") return amber;
   return blue;
+}
+
+function statusColor(status: string): RGB {
+  if (status === "Aligned") return green;
+  if (status === "Partial" || status === "EvidenceRequired") return amber;
+  if (status === "Gap") return red;
+  return slate;
+}
+
+function pdfCopy(language: ReportLanguage) {
+  if (language === "en") {
+    return {
+      coverTitle: "Executive Assessment Report",
+      coverSubtitle: "SDLC, DevOps and DevSecOps maturity assessment",
+      overallScore: "Overall score",
+      maturityLevel: "Maturity level",
+      assessmentClassification: "Assessment classification",
+      openRecommendations: "Open recommendations",
+      prioritizedActions: "Prioritized actions",
+      answeredEvidence: "Answered evidence",
+      collectedInputs: "Collected assessment inputs",
+      executivePriorities: "Executive priorities",
+      riskConcentration: "Primary risk concentration",
+      assessmentScope: "Assessment scope",
+      localGenerationNote: "Report is generated from local assessment data and deterministic rule outputs. No external service is required for PDF creation.",
+      maturityScorecard: "Maturity Scorecard",
+      domainView: "domain based maturity view",
+      recommendations: "Recommendations",
+      prioritizedBacklog: "prioritized improvement backlog",
+      summaryInsights: "Summary insights",
+      roadmapTitle: "Roadmap & Delivery Model",
+      executionPlan: "phased execution plan",
+      regulatoryAlignment: "Regulatory Alignment",
+      footerPurpose: "This document is intended for executive assessment and planning use."
+    };
+  }
+  return {
+    coverTitle: "Yönetici Assessment Raporu",
+    coverSubtitle: "SDLC, DevOps ve DevSecOps olgunluk değerlendirmesi",
+    overallScore: "Genel skor",
+    maturityLevel: "Olgunluk seviyesi",
+    assessmentClassification: "Assessment sınıflandırması",
+    openRecommendations: "Açık öneriler",
+    prioritizedActions: "Öncelikli aksiyonlar",
+    answeredEvidence: "Yanıtlanan kanıt",
+    collectedInputs: "Toplanan assessment girdileri",
+    executivePriorities: "Yönetici öncelikleri",
+    riskConcentration: "Ana risk yoğunlaşması",
+    assessmentScope: "Assessment kapsamı",
+    localGenerationNote: "Rapor yerel assessment verisi ve deterministik kural çıktılarıyla oluşturulur. PDF üretimi için dış servis zorunlu değildir.",
+    maturityScorecard: "Olgunluk Skor Kartı",
+    domainView: "alan bazlı olgunluk görünümü",
+    recommendations: "Öneriler",
+    prioritizedBacklog: "önceliklendirilmiş iyileştirme backlog'u",
+    summaryInsights: "Yorum özeti",
+    roadmapTitle: "Yol Haritası ve Teslim Modeli",
+    executionPlan: "fazlandırılmış uygulama planı",
+    regulatoryAlignment: "Mevzuat Uyum",
+    footerPurpose: "Bu doküman yönetici değerlendirmesi ve planlama amacıyla hazırlanmıştır."
+  };
 }
 
 function compactName(value: string) {

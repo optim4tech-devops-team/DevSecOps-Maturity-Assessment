@@ -855,7 +855,7 @@
       "id": "k8s_container_standard",
       "code": "K8S-CONTAINER-001",
       "categoryId": "k8s",
-      "text": "Container image, registry, deployment manifest ve runtime güvenlik standartları nasıl uygulanmaktadır?",
+      "text": "Container image, registry, deployment manifest ve runtime güvenlik standartları enterprise tool zinciriyle nasıl uygulanmaktadır?",
       "type": "single",
       "weight": 4,
       "required": true,
@@ -866,22 +866,22 @@
           "score": 0
         },
         {
-          "label": "Temel Dockerfile ve registry kullanımı var",
+          "label": "Temel Dockerfile ve registry kullanımı var; standartlar ekip bazında değişiyor",
           "value": "basic",
           "score": 2
         },
         {
-          "label": "Bazı ürünlerde standart image ve deployment şablonu kullanılıyor",
+          "label": "Bazı ürünlerde standart image, registry ve deployment şablonu kullanılıyor",
           "value": "template_partial",
           "score": 3
         },
         {
-          "label": "Kritik ürünlerde approved base image, resource ve probe standartları var",
+          "label": "Kritik ürünlerde approved base image, Quay/Harbor benzeri registry, resource ve probe standartları var",
           "value": "critical_standard",
           "score": 4
         },
         {
-          "label": "Image, manifest, runtime policy ve provenance uçtan uca otomasyonla korunuyor",
+          "label": "Image, manifest, runtime policy, provenance ve registry güvenliği uçtan uca otomasyonla korunuyor",
           "value": "managed",
           "score": 5
         }
@@ -891,33 +891,33 @@
       "id": "k8s_policy_admission",
       "code": "K8S-POLICY-001",
       "categoryId": "k8s",
-      "text": "Kubernetes admission control, policy as code ve namespace güvenlik kontrolleri hangi kapsamda işletilmektedir?",
+      "text": "Kubernetes/OpenShift admission control, policy as code ve namespace güvenlik kontrolleri hangi kapsamda işletilmektedir?",
       "type": "single",
       "weight": 4,
       "required": true,
       "options": [
         {
-          "label": "Admission policy veya namespace standardı yok",
+          "label": "Admission policy, namespace standardı veya OpenShift SCC benzeri kontrol yok",
           "value": "none",
           "score": 0
         },
         {
-          "label": "Bazı manuel checklist veya cluster standardı var",
+          "label": "Bazı manuel checklist, cluster standardı veya platform guideline var",
           "value": "manual_check",
           "score": 2
         },
         {
-          "label": "Temel policy kontrolleri bazı namespace'lerde uygulanıyor",
+          "label": "Temel policy kontrolleri bazı namespace/project kapsamlarında uygulanıyor",
           "value": "partial_policy",
           "score": 3
         },
         {
-          "label": "Kritik namespace'lerde resource, security context ve image policy zorunlu",
+          "label": "Kritik namespace'lerde resource, security context, SCC/PSA ve image policy zorunlu",
           "value": "critical_policy",
           "score": 4
         },
         {
-          "label": "Policy as code, exception, audit ve remediation süreci merkezi yönetiliyor",
+          "label": "Policy as code, Red Hat ACS/Gatekeeper/Kyverno kontrolleri, exception, audit ve remediation merkezi yönetiliyor",
           "value": "managed_policy",
           "score": 5
         }
@@ -960,6 +960,31 @@
         {
           "label": "New Relic",
           "value": "newrelic",
+          "score": 4
+        },
+        {
+          "label": "Splunk",
+          "value": "splunk",
+          "score": 4
+        },
+        {
+          "label": "ELK / OpenSearch",
+          "value": "elk_opensearch",
+          "score": 4
+        },
+        {
+          "label": "Loki",
+          "value": "loki",
+          "score": 3
+        },
+        {
+          "label": "Azure Monitor",
+          "value": "azure_monitor",
+          "score": 3
+        },
+        {
+          "label": "AppDynamics",
+          "value": "appdynamics",
           "score": 4
         },
         {
