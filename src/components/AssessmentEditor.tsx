@@ -93,10 +93,34 @@ export function AssessmentEditor({ token, initialProfile, initialAnswers, onSave
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h2 className="text-sm font-semibold">Assessment wizard</h2>
-          <p className="mt-1 text-xs text-muted">Sıralı kategori akışı ile ilerleyin; Complete sadece son adımda görünür.</p>
+          <p className="mt-1 text-xs text-muted">Müşteri profilini güncelleyip sıralı kategori akışı ile assessment cevaplarını tamamlayın.</p>
         </div>
         <span className="w-fit shrink-0 rounded bg-wash px-2 py-1 text-xs font-semibold text-muted">{score.completion}% complete</span>
       </div>
+
+      <section className="mb-4 overflow-hidden rounded-md border border-[#c8d9e6] bg-[#f6fbff]">
+        <div className="border-b border-[#d7e6f0] bg-white/80 px-3 py-2">
+          <div className="text-sm font-semibold text-ink">Customer information</div>
+          <p className="mt-0.5 text-xs leading-5 text-muted">Bu bilgiler rapor başlığı, export dosyaları ve assessment kapsamı için kullanılır.</p>
+        </div>
+        <div className="grid grid-cols-1 gap-3 p-3 md:grid-cols-2 xl:grid-cols-4">
+          <ProfileTextField label="Customer name" value={profile.companyName} onChange={(value) => setProfile({ ...profile, companyName: value })} />
+          <ProfileTextField label="Sector" value={profile.sector} onChange={(value) => setProfile({ ...profile, sector: value })} />
+          <ProfileNumberField label="Employees" value={profile.employeeCount} onChange={(value) => setProfile({ ...profile, employeeCount: value })} />
+          <ProfileNumberField label="Developers" value={profile.developerCount} onChange={(value) => setProfile({ ...profile, developerCount: value })} />
+          <ProfileNumberField label="DevOps engineers" value={profile.devopsEngineerCount} onChange={(value) => setProfile({ ...profile, devopsEngineerCount: value })} />
+          <ProfileNumberField label="Applications" value={profile.applicationCount} onChange={(value) => setProfile({ ...profile, applicationCount: value })} />
+          <ProfileNumberField label="Production apps" value={profile.productionApplicationCount} onChange={(value) => setProfile({ ...profile, productionApplicationCount: value })} />
+          <ProfileNumberField label="Critical apps" value={profile.criticalApplicationCount} onChange={(value) => setProfile({ ...profile, criticalApplicationCount: value })} />
+          <ProfileTextField label="Cloud provider" value={profile.cloudProvider} onChange={(value) => setProfile({ ...profile, cloudProvider: value })} wide />
+          <ProfileTextField label="Kubernetes usage" value={profile.kubernetesUsage} onChange={(value) => setProfile({ ...profile, kubernetesUsage: value })} />
+          <ProfileTextField label="Source control" value={profile.sourceControlTool} onChange={(value) => setProfile({ ...profile, sourceControlTool: value })} />
+          <ProfileTextField label="CI/CD tool" value={profile.cicdTool} onChange={(value) => setProfile({ ...profile, cicdTool: value })} />
+          <ProfileTextField label="ITSM tool" value={profile.itsmTool} onChange={(value) => setProfile({ ...profile, itsmTool: value })} />
+          <ProfileTextField label="Security tools" value={profile.securityTools} onChange={(value) => setProfile({ ...profile, securityTools: value })} wide />
+          <ProfileTextField label="Monitoring tools" value={profile.monitoringTools} onChange={(value) => setProfile({ ...profile, monitoringTools: value })} wide />
+        </div>
+      </section>
 
       <div className="mb-4 flex snap-x gap-2 overflow-x-auto pb-1">
         {wizardCategories.map((category, index) => {
@@ -159,6 +183,34 @@ export function AssessmentEditor({ token, initialProfile, initialAnswers, onSave
         {isLastStep && !allRequiredAnswered ? <p className="mt-2 text-xs leading-5 text-danger">Complete için zorunlu soruların tamamı yanıtlanmalı.</p> : null}
       </div>
     </div>
+  );
+}
+
+function ProfileTextField({ label, value, onChange, wide = false }: { label: string; value: string; onChange: (value: string) => void; wide?: boolean }) {
+  return (
+    <label className={`text-xs font-semibold text-muted ${wide ? "xl:col-span-2" : ""}`}>
+      {label}
+      <input
+        className="focus-ring mt-1 h-10 w-full rounded-md border border-[#cbd9e4] bg-white px-3 text-sm font-medium text-ink shadow-[0_1px_2px_rgba(16,24,40,0.03)]"
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    </label>
+  );
+}
+
+function ProfileNumberField({ label, value, onChange }: { label: string; value: number; onChange: (value: number) => void }) {
+  return (
+    <label className="text-xs font-semibold text-muted">
+      {label}
+      <input
+        type="number"
+        min={0}
+        className="focus-ring mt-1 h-10 w-full rounded-md border border-[#cbd9e4] bg-white px-3 text-sm font-medium text-ink shadow-[0_1px_2px_rgba(16,24,40,0.03)]"
+        value={Number.isFinite(value) ? value : 0}
+        onChange={(event) => onChange(Number(event.target.value))}
+      />
+    </label>
   );
 }
 

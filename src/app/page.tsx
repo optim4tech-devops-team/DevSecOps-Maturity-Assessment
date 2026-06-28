@@ -194,13 +194,20 @@ export default function Home() {
   }
 
   return (
-    <main className="grid min-h-screen grid-cols-1 bg-wash lg:grid-cols-[240px_minmax(0,1fr)]">
-      <aside className="hidden border-r border-line bg-ink px-4 py-5 text-white lg:block">
+    <main className="grid min-h-screen grid-cols-1 bg-[linear-gradient(180deg,#eef6fb_0%,#f7f9fc_42%,#f5f7f9_100%)] lg:grid-cols-[252px_minmax(0,1fr)]">
+      <aside className="hidden border-r border-[#17314f] bg-[linear-gradient(180deg,#07182d_0%,#102642_54%,#07131f_100%)] px-4 py-5 text-white lg:block">
         <div className="mb-8 flex items-center gap-3">
-          <div className="grid h-9 w-9 place-items-center rounded-md bg-teal"><ShieldCheck size={19} /></div>
+          <div className="grid h-10 w-10 place-items-center rounded-md bg-[#20b7a7] shadow-[0_12px_30px_rgba(32,183,167,0.24)]"><ShieldCheck size={20} /></div>
           <div>
-            <div className="text-sm font-semibold leading-tight">Enterprise Assessment</div>
-            <div className="text-xs text-white/60">Active: SDLC & DevSecOps</div>
+            <div className="text-sm font-semibold leading-tight">Assessment Center</div>
+            <div className="text-xs text-white/60">SDLC & DevSecOps module</div>
+          </div>
+        </div>
+        <div className="mb-4 rounded-md border border-white/10 bg-white/[0.045] p-3">
+          <div className="text-[11px] font-semibold uppercase tracking-wide text-white/45">Workspace</div>
+          <div className="mt-1 text-sm font-semibold text-white">Customer delivery</div>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
+            <div className="h-full w-3/4 rounded-full bg-[#20b7a7]" />
           </div>
         </div>
         {navigationItems.map((item) => (
@@ -211,7 +218,7 @@ export default function Home() {
             whileHover={reduceMotion ? undefined : { x: 2 }}
             whileTap={reduceMotion ? undefined : { scale: 0.98 }}
             transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
-            className={`focus-ring mb-1 flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition ${activeView === item.id ? "bg-white/12 text-white" : "text-white/70 hover:bg-white/7 hover:text-white"}`}
+            className={`focus-ring mb-1 flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition ${activeView === item.id ? "bg-[#20b7a7] text-white shadow-[0_10px_22px_rgba(32,183,167,0.20)]" : "text-white/70 hover:bg-white/8 hover:text-white"}`}
           >
             <item.icon size={15} />
             {item.label}
@@ -219,17 +226,17 @@ export default function Home() {
         ))}
       </aside>
       <section className="min-w-0">
-        <header className="flex flex-col gap-3 border-b border-line bg-white px-4 py-3 xl:flex-row xl:items-center xl:justify-between xl:px-5">
+        <header className="flex flex-col gap-3 border-b border-[#d6e4ee] bg-white/92 px-4 py-3 shadow-[0_1px_0_rgba(255,255,255,0.75)] backdrop-blur xl:flex-row xl:items-center xl:justify-between xl:px-5">
           <div className="min-w-0">
             <h1 className="text-base font-semibold text-ink">Enterprise Assessment Platform</h1>
-            <p className="text-xs text-muted">Aktif assessment modülü: SDLC & DevSecOps. Platform Kubernetes, ağ güvenliği ve altyapı assessment modülleriyle genişletilebilir.</p>
+            <p className="text-xs text-muted">Aktif modül: SDLC & DevSecOps. Platform Kubernetes, ağ güvenliği ve altyapı assessment modülleriyle genişletilebilir.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <select className="focus-ring min-w-[190px] rounded-md border border-line bg-white px-3 py-2 text-sm" value={selectedToken} onChange={(event) => setSelectedToken(event.target.value)}>
+            <select className="focus-ring min-w-[210px] rounded-md border border-[#cbd9e4] bg-white px-3 py-2 text-sm font-semibold text-ink shadow-[0_1px_2px_rgba(16,24,40,0.04)]" value={selectedToken} onChange={(event) => setSelectedToken(event.target.value)}>
               {assessments.map((item) => <option key={item.token} value={item.token}>{item.organization.companyName}</option>)}
             </select>
-            <button onClick={loadAssessments} className="focus-ring rounded-md border border-line bg-white p-2 text-ink"><RefreshCcw size={16} /></button>
-            <button onClick={logout} className="focus-ring flex items-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink"><LogOut size={16} /> Logout</button>
+            <button onClick={loadAssessments} className="focus-ring rounded-md border border-[#cbd9e4] bg-white p-2 text-ink shadow-[0_1px_2px_rgba(16,24,40,0.04)]"><RefreshCcw size={16} /></button>
+            <button onClick={logout} className="focus-ring flex items-center gap-2 rounded-md border border-[#cbd9e4] bg-white px-3 py-2 text-sm font-semibold text-ink shadow-[0_1px_2px_rgba(16,24,40,0.04)]"><LogOut size={16} /> Logout</button>
           </div>
         </header>
         <nav className="border-b border-line bg-white px-3 py-2 lg:hidden">
@@ -368,7 +375,7 @@ function AdminWorkspace({
 
 function MetricTile({ label, value, detail }: { label: string; value: string; detail?: string }) {
   return (
-    <div className="rounded-md border border-line bg-white p-3">
+    <div className="rounded-md border border-[#d5e1ea] bg-white p-3 shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
       <div className="text-xs font-semibold text-muted">{label}</div>
       <div className="mt-1 text-xl font-semibold text-ink">{value}</div>
       {detail ? <div className="mt-1 text-xs leading-5 text-muted">{detail}</div> : null}
@@ -435,68 +442,102 @@ function CustomersView({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <div className="panel p-4">
-        <div className="mb-4">
-          <h2 className="text-sm font-semibold">Customer workspace</h2>
-          <p className="mt-1 text-xs leading-5 text-muted">Müşteri token oluşturma, link paylaşımı ve kayıt yönetimi bu ekrandan yürütülür.</p>
+    <div className="space-y-4">
+      <div className="overflow-hidden rounded-md border border-[#bfd4e5] bg-[linear-gradient(135deg,#09213d_0%,#123f6d_58%,#0aa394_100%)] p-5 text-white shadow-[0_18px_45px_rgba(9,33,61,0.16)]">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wide text-white/60">Selected customer</div>
+            <h2 className="mt-2 text-2xl font-semibold leading-tight">{record.organization.companyName}</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/72">{record.organization.sector} assessment token yönetimi, müşteri bilgisi düzenleme ve rapor linkleri bu ekrandan yürütülür.</p>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-md border border-white/15 bg-white/10 px-4 py-3">
+              <div className="text-xl font-semibold">{score.completion}%</div>
+              <div className="text-[11px] font-semibold text-white/62">Completion</div>
+            </div>
+            <div className="rounded-md border border-white/15 bg-white/10 px-4 py-3">
+              <div className="text-xl font-semibold">{score.overallScore}</div>
+              <div className="text-[11px] font-semibold text-white/62">Score</div>
+            </div>
+            <div className="rounded-md border border-white/15 bg-white/10 px-4 py-3">
+              <div className="text-xl font-semibold">{recommendationCount}</div>
+              <div className="text-[11px] font-semibold text-white/62">Actions</div>
+            </div>
+          </div>
         </div>
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          <label className="text-xs font-semibold text-muted">
-            Company name
-            <input className="focus-ring mt-1 w-full rounded-md border border-line px-3 py-2 text-sm font-medium text-ink" value={newCompany.companyName} onChange={(event) => setNewCompany({ ...newCompany, companyName: event.target.value })} />
-          </label>
-          <label className="text-xs font-semibold text-muted">
-            Sector
-            <input className="focus-ring mt-1 w-full rounded-md border border-line px-3 py-2 text-sm font-medium text-ink" value={newCompany.sector} onChange={(event) => setNewCompany({ ...newCompany, sector: event.target.value })} />
-          </label>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <motion.button
-            onClick={() => void createLink()}
-            whileTap={{ scale: 0.98 }}
-            transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
-            className="focus-ring flex items-center gap-2 rounded-md bg-teal px-3 py-2 text-sm font-semibold text-white"
-          >
-            <Plus size={16} /> Create token link
-          </motion.button>
-          <button onClick={() => void deleteSelectedAssessment()} className="focus-ring flex items-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-danger"><Trash2 size={16} /> Delete selected</button>
-        </div>
-        <div className="mt-6 border-t border-line pt-5">
-          <h3 className="text-sm font-semibold text-ink">Edit selected customer</h3>
-          <p className="mt-1 text-xs leading-5 text-muted">Seçili token üzerindeki müşteri adı ve sektör bilgisini hızlıca güncelleyebilirsiniz.</p>
-          <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[420px_minmax(0,1fr)_320px]">
+        <div className="panel overflow-hidden">
+          <div className="border-b border-[#d8e5ee] bg-[#f3f9fc] px-4 py-3">
+            <h2 className="text-sm font-semibold text-ink">Create customer token</h2>
+            <p className="mt-1 text-xs leading-5 text-muted">Yeni müşteri için private assessment linki oluşturun.</p>
+          </div>
+          <div className="space-y-3 p-4">
             <label className="text-xs font-semibold text-muted">
-              Customer name
-              <input className="focus-ring mt-1 w-full rounded-md border border-line px-3 py-2 text-sm font-medium text-ink" value={selectedProfile.companyName} onChange={(event) => setSelectedProfile({ ...selectedProfile, companyName: event.target.value })} />
+              Company name
+              <input className="focus-ring mt-1 h-11 w-full rounded-md border border-[#cbd9e4] px-3 text-sm font-medium text-ink" value={newCompany.companyName} onChange={(event) => setNewCompany({ ...newCompany, companyName: event.target.value })} />
             </label>
             <label className="text-xs font-semibold text-muted">
               Sector
-              <input className="focus-ring mt-1 w-full rounded-md border border-line px-3 py-2 text-sm font-medium text-ink" value={selectedProfile.sector} onChange={(event) => setSelectedProfile({ ...selectedProfile, sector: event.target.value })} />
+              <input className="focus-ring mt-1 h-11 w-full rounded-md border border-[#cbd9e4] px-3 text-sm font-medium text-ink" value={newCompany.sector} onChange={(event) => setNewCompany({ ...newCompany, sector: event.target.value })} />
             </label>
-          </div>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <button onClick={() => void saveSelectedCustomer()} disabled={saveState === "saving"} className="focus-ring rounded-md bg-ink px-3 py-2 text-sm font-semibold text-white disabled:cursor-wait disabled:opacity-60">{saveState === "saving" ? "Saving..." : "Save customer"}</button>
-            {saveState === "saved" ? <span className="text-xs font-semibold text-teal">Saved</span> : null}
-            {saveState === "error" ? <span className="text-xs font-semibold text-danger">Kaydedilemedi</span> : null}
+            <motion.button
+              onClick={() => void createLink()}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: motionTokens.duration.fast, ease: motionTokens.easing.smooth }}
+              className="focus-ring flex h-11 w-full items-center justify-center gap-2 rounded-md bg-teal px-3 text-sm font-semibold text-white shadow-[0_10px_22px_rgba(15,159,143,0.22)]"
+            >
+              <Plus size={16} /> Create token link
+            </motion.button>
           </div>
         </div>
-        <div className="mt-5 rounded-md border border-line bg-wash p-3">
-          <div className="mb-2 flex items-center justify-between gap-3">
-            <div className="text-xs font-semibold text-muted">Active customer link</div>
-            <span className="rounded bg-white px-2 py-1 text-xs font-semibold text-muted">{record.status}</span>
+
+        <div className="panel overflow-hidden">
+          <div className="flex flex-col gap-2 border-b border-[#d8e5ee] bg-white px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-ink">Edit selected customer</h3>
+              <p className="mt-1 text-xs leading-5 text-muted">Bu alan seçili token üzerindeki müşteri bilgisini günceller.</p>
+            </div>
+            <span className="w-fit rounded-md bg-[#edf7f6] px-2 py-1 text-xs font-semibold text-teal">{record.status}</span>
           </div>
-          <div className="break-all text-xs leading-5 text-ink">{publicLink}</div>
-          <button onClick={copyLink} className="focus-ring mt-3 flex w-full items-center justify-center gap-2 rounded-md bg-ink px-3 py-2 text-sm font-semibold text-white"><Clipboard size={16} /> Copy customer link</button>
+          <div className="p-4">
+            <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <label className="text-xs font-semibold text-muted">
+                Customer name
+                <input className="focus-ring mt-1 h-11 w-full rounded-md border border-[#cbd9e4] px-3 text-sm font-medium text-ink" value={selectedProfile.companyName} onChange={(event) => setSelectedProfile({ ...selectedProfile, companyName: event.target.value })} />
+              </label>
+              <label className="text-xs font-semibold text-muted">
+                Sector
+                <input className="focus-ring mt-1 h-11 w-full rounded-md border border-[#cbd9e4] px-3 text-sm font-medium text-ink" value={selectedProfile.sector} onChange={(event) => setSelectedProfile({ ...selectedProfile, sector: event.target.value })} />
+              </label>
+            </div>
+            <div className="mt-4 rounded-md border border-[#d8e5ee] bg-[#f7fafc] p-3">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <div className="text-xs font-semibold text-muted">Active customer link</div>
+                <button onClick={copyLink} className="focus-ring flex items-center gap-1 rounded-md border border-[#cbd9e4] bg-white px-2 py-1 text-xs font-semibold text-ink"><Clipboard size={13} /> Copy</button>
+              </div>
+              <div className="break-all text-xs leading-5 text-ink">{publicLink}</div>
+            </div>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <button onClick={() => void saveSelectedCustomer()} disabled={saveState === "saving"} className="focus-ring rounded-md bg-ink px-4 py-2 text-sm font-semibold text-white disabled:cursor-wait disabled:opacity-60">{saveState === "saving" ? "Saving..." : "Save customer"}</button>
+              <button onClick={() => void deleteSelectedAssessment()} className="focus-ring flex items-center gap-2 rounded-md border border-danger/25 bg-red-50 px-3 py-2 text-sm font-semibold text-danger"><Trash2 size={16} /> Delete selected</button>
+              {saveState === "saved" ? <span className="text-xs font-semibold text-teal">Saved</span> : null}
+              {saveState === "error" ? <span className="text-xs font-semibold text-danger">Kaydedilemedi</span> : null}
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="panel p-4">
-        <h3 className="mb-3 text-sm font-semibold">Assessment summary</h3>
-        <div className="grid grid-cols-2 gap-2">
-          <MetricTile label="Status" value={record.status} />
-          <MetricTile label="Completion" value={`${score.completion}%`} />
-          <MetricTile label="Score" value={`${score.overallScore}/100`} />
-          <MetricTile label="Findings" value={`${recommendationCount}`} />
+
+        <div className="panel overflow-hidden">
+          <div className="border-b border-[#d8e5ee] bg-[#f3f9fc] px-4 py-3">
+            <h3 className="text-sm font-semibold">Assessment summary</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-2 p-4">
+            <MetricTile label="Status" value={record.status} />
+            <MetricTile label="Completion" value={`${score.completion}%`} />
+            <MetricTile label="Score" value={`${score.overallScore}/100`} />
+            <MetricTile label="Findings" value={`${recommendationCount}`} />
+          </div>
         </div>
       </div>
     </div>

@@ -17,64 +17,151 @@ type RGB = readonly [number, number, number];
 
 const pageWidth = 1190;
 const pageHeight = 842;
-const navy: RGB = [5, 25, 54];
-const blue: RGB = [25, 92, 180];
-const green: RGB = [70, 172, 56];
-const amber: RGB = [245, 166, 35];
-const red: RGB = [236, 76, 61];
-const purple: RGB = [112, 55, 190];
-const line: RGB = [204, 214, 224];
+const navy: RGB = [6, 24, 52];
+const deepBlue: RGB = [17, 55, 104];
+const blue: RGB = [37, 99, 179];
+const cyan: RGB = [35, 160, 185];
+const green: RGB = [63, 166, 75];
+const amber: RGB = [238, 157, 34];
+const red: RGB = [226, 67, 56];
+const purple: RGB = [102, 67, 181];
+const slate: RGB = [77, 91, 111];
+const line: RGB = [207, 217, 228];
+const softLine: RGB = [230, 235, 241];
 const wash: RGB = [246, 248, 251];
-const ink: RGB = [20, 34, 52];
+const panel: RGB = [252, 253, 255];
+const ink: RGB = [20, 32, 48];
 
 export function generateExecutivePdfReport(profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[], answers: Answers) {
   const doc = createDoc();
-  const securityScores = getSecurityScores(score.categoryScores, recommendations);
-  const orderedCategories = [...score.categoryScores].sort((a, b) => b.score - a.score);
-  const lowestCategories = [...score.categoryScores].sort((a, b) => a.score - b.score).slice(0, 6);
+  const sortedCategories = [...score.categoryScores].sort((a, b) => b.score - a.score);
+  const lowCategories = [...score.categoryScores].sort((a, b) => a.score - b.score).slice(0, 5);
   const roadmap = buildRoadmap(recommendations);
-  const title = `${profile.companyName} SDLC & DEVSECOPS ASSESSMENT RAPORU`;
+  const evidenceCount = Object.values(answers).filter((value) => {
+    if (Array.isArray(value)) return value.length > 0;
+    return value !== undefined && value !== null && String(value).trim() !== "" && String(value) !== "0";
+  }).length;
 
-  fill(doc, 0, 0, pageWidth, pageHeight, 255, 255, 255);
-  fill(doc, 0, 760, pageWidth, 82, ...navy);
-  text(doc, title, 24, 810, 21, "bold", 255, 255, 255);
-  text(doc, `${profile.sourceControlTool} + ${profile.cicdTool} + ${profile.itsmTool} ENTEGRE UCTAN UCA SDLC SURECI`, 24, 784, 13, "bold", 116, 218, 232);
+  drawCoverPage(doc, profile, score, recommendations, lowCategories, evidenceCount);
+  addPage(doc);
+  drawMaturityPage(doc, profile, score, sortedCategories, lowCategories);
+  addPage(doc);
+  drawRecommendationsPage(doc, profile, score, recommendations);
+  addPage(doc);
+  drawRoadmapPage(doc, profile, score, recommendations, roadmap);
 
-  section(doc, 12, 330, 300, 410, "1. OLGUNLUK OZETI (ALAN BAZLI)");
-  drawMaturityList(doc, orderedCategories.slice(0, 12), 28, 704, 258);
-  drawMaturityList(doc, lowestCategories, 28, 444, 258, true);
-
-  drawScoreBadge(doc, score.overallScore, score.maturityLevel, 884, 780);
-  drawLegend(doc, 1010, 812);
-
-  section(doc, 322, 330, 856, 410, "2. UCTAN UCA SDLC SURECI AKISI");
-  drawSdlcFlow(doc, 340, 638);
-  drawIntegrationStrip(doc, 340, 454);
-
-  section(doc, 12, 70, 274, 240, "3. OLGUNLUK RADAR GRAFIGI");
-  drawRadarApprox(doc, score.categoryScores, 42, 102, 210, 154);
-
-  section(doc, 300, 70, 490, 240, "4. GUVENLIK (DEVSECOPS) OLGUNLUK DETAYI");
-  drawSecurityDetail(doc, securityScores, 318, 258);
-
-  section(doc, 802, 195, 376, 115, "5. OTOMATIK RELEASE YONETIMI");
-  drawReleaseFlow(doc, 820, 238);
-
-  section(doc, 802, 70, 376, 110, "6. HEDEF YOL HARITASI");
-  drawRoadmap(doc, roadmap, 816, 145);
-
-  fill(doc, 12, 8, 1180, 48, 255, 255, 255);
-  stroke(doc, 12, 56, 1180, 56, ...line);
-  text(doc, "7. GENEL DEGERLENDIRME", 24, 38, 11, "bold", ...ink);
-  const summary = buildDeterministicSummary(profile, score, recommendations);
-  wrapText(doc, summary, 210, 42, 570, 8.5, 10, "regular", ...ink);
-  fill(doc, 746, 18, 262, 24, ...navy);
-  fill(doc, 1008, 18, 122, 24, ...green);
-  text(doc, "GENEL DEVOPS PLATFORM OLGUNLUK SKORU", 758, 27, 8, "bold", 255, 255, 255);
-  text(doc, `%${score.overallScore} (${scoreLabel(score.overallScore)})`, 1022, 27, 10, "bold", 255, 255, 255);
-
-  void answers;
   return Buffer.from(renderPdf(doc));
+}
+
+function drawCoverPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[], lowCategories: CategoryScore[], evidenceCount: number) {
+  drawShell(doc, "Executive Assessment Report", "SDLC, DevOps and DevSecOps maturity assessment", 1);
+  fill(doc, 0, 640, pageWidth, 202, ...navy);
+  fill(doc, 0, 640, pageWidth, 7, ...cyan);
+  text(doc, profile.companyName, 56, 776, 30, "bold", 255, 255, 255);
+  text(doc, "SDLC & DevSecOps Maturity Assessment", 56, 738, 20, "bold", 177, 232, 240);
+  wrapText(doc, buildExecutiveVerdict(profile, score, recommendations), 56, 704, 610, 12, 17, "regular", 232, 240, 248, 4);
+
+  drawScoreDial(doc, 930, 724, 76, score.overallScore, scoreLabel(score.overallScore));
+  drawMaturityLegend(doc, 1032, 776);
+
+  drawKpiCard(doc, 56, 520, 238, 86, "Overall score", `%${score.overallScore}`, scoreLabel(score.overallScore), scoreColor(score.overallScore));
+  drawKpiCard(doc, 316, 520, 238, 86, "Maturity level", levelShort(score.maturityLevel), "Assessment classification", blue);
+  drawKpiCard(doc, 576, 520, 238, 86, "Open recommendations", String(recommendations.length), "Prioritized actions", severityColor(recommendations[0]?.severity));
+  drawKpiCard(doc, 836, 520, 238, 86, "Answered evidence", String(evidenceCount), "Collected assessment inputs", purple);
+
+  drawPanel(doc, 56, 304, 508, 178, "Executive priorities");
+  recommendations.slice(0, 3).forEach((item, index) => {
+    const y = 438 - index * 48;
+    drawPill(doc, 78, y + 3, 42, 18, item.priority, priorityColor(item.priority));
+    text(doc, item.title, 134, y + 7, 11, "bold", ...ink);
+    wrapText(doc, item.expectedImpact || item.description, 134, y - 10, 360, 8.5, 11, "regular", ...slate, 2);
+  });
+
+  drawPanel(doc, 608, 304, 526, 178, "Primary risk concentration");
+  lowCategories.forEach((item, index) => {
+    const y = 434 - index * 30;
+    text(doc, compactName(item.category.name), 632, y + 2, 9.5, "bold", ...ink);
+    drawProgressBar(doc, 834, y, 202, 10, item.score, scoreColor(item.score));
+    text(doc, `%${item.score}`, 1050, y - 1, 9, "bold", ...ink);
+  });
+
+  drawPanel(doc, 56, 108, 1078, 150, "Assessment scope");
+  drawProfileGrid(doc, profile, 82, 212);
+  drawFooterNote(doc, "Report is generated from local assessment data and deterministic rule outputs. No external service is required for PDF creation.");
+}
+
+function drawMaturityPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, categories: CategoryScore[], lowCategories: CategoryScore[]) {
+  drawShell(doc, "Maturity Scorecard", `${profile.companyName} - domain based maturity view`, 2);
+
+  drawPanel(doc, 56, 560, 326, 176, "Score interpretation");
+  drawScoreDial(doc, 216, 648, 58, score.overallScore, scoreLabel(score.overallScore));
+  wrapText(doc, `The current platform is assessed at ${score.maturityLevel}. Improvement focus should remain on lower scoring governance, CI quality and security controls until all release-critical controls are measurable.`, 84, 590, 248, 10, 14, "regular", ...slate, 5);
+
+  drawPanel(doc, 414, 560, 720, 176, "Top maturity domains");
+  categories.slice(0, 5).forEach((item, index) => {
+    const x = 440 + index * 136;
+    drawVerticalScore(doc, x, 594, 92, item.score, compactName(item.category.name));
+  });
+
+  drawPanel(doc, 56, 278, 508, 236, "Domain score distribution");
+  categories.slice(0, 10).forEach((item, index) => {
+    const y = 476 - index * 21;
+    text(doc, compactName(item.category.name), 84, y + 2, 8.6, "bold", ...ink);
+    drawProgressBar(doc, 284, y, 206, 9, item.score, scoreColor(item.score));
+    text(doc, `%${item.score}`, 506, y - 1, 8.5, "bold", ...ink);
+  });
+
+  drawPanel(doc, 608, 278, 526, 236, "Improvement focus");
+  lowCategories.forEach((item, index) => {
+    const y = 470 - index * 38;
+    drawRiskBand(doc, 632, y - 2, item.score);
+    text(doc, compactName(item.category.name), 710, y + 5, 10, "bold", ...ink);
+    wrapText(doc, item.category.description || "Target operating model and evidence maturity should be improved.", 710, y - 11, 338, 8, 10, "regular", ...slate, 2);
+  });
+
+  drawPanel(doc, 56, 106, 1078, 126, "Operating model signal");
+  drawSignalCard(doc, 84, 142, "Release control", findScore(categories, "release"), "Approval, rollback and evidence controls");
+  drawSignalCard(doc, 344, 142, "CI quality", findScore(categories, "ci"), "Build, test and quality gate automation");
+  drawSignalCard(doc, 604, 142, "Security posture", findScore(categories, "devsecops"), "SAST, SCA, DAST, secret and runtime controls");
+  drawSignalCard(doc, 864, 142, "Observability", findScore(categories, "observability"), "Monitoring, logging, SLO and incident visibility");
+}
+
+function drawRecommendationsPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[]) {
+  drawShell(doc, "Recommendations", `${profile.companyName} - prioritized improvement backlog`, 3);
+
+  drawPanel(doc, 56, 596, 1078, 140, "Executive narrative");
+  wrapText(doc, buildDeterministicSummary(profile, score, recommendations), 84, 690, 740, 12, 16, "regular", ...ink, 4);
+  drawKpiCard(doc, 864, 632, 112, 58, "P1", String(recommendations.filter((item) => item.priority === "P1").length), "Immediate", red);
+  drawKpiCard(doc, 994, 632, 112, 58, "P2/P3", String(recommendations.filter((item) => item.priority !== "P1").length), "Planned", amber);
+
+  drawPanel(doc, 56, 124, 1078, 426, "Prioritized action register");
+  drawTableHeader(doc, 80, 486);
+  recommendations.slice(0, 8).forEach((item, index) => {
+    drawRecommendationRow(doc, item, 80, 448 - index * 40, index);
+  });
+
+  drawFooterNote(doc, "Reports menu can also export the same action register as Jira issue CSV for backlog creation.");
+}
+
+function drawRoadmapPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[], roadmap: ReturnType<typeof buildRoadmap>) {
+  drawShell(doc, "Roadmap & Delivery Model", `${profile.companyName} - phased execution plan`, 4);
+
+  drawPanel(doc, 56, 558, 1078, 178, "Assessment delivery flow");
+  drawDeliveryFlow(doc, 92, 642);
+
+  drawPanel(doc, 56, 248, 1078, 264, "90 day roadmap");
+  roadmap.forEach((phase, index) => {
+    drawRoadmapColumn(doc, 90 + index * 348, 282, 306, 190, phase, index);
+  });
+
+  drawPanel(doc, 56, 106, 516, 96, "Release governance");
+  wrapText(doc, "Every completed assessment keeps the same token. When scoring is completed, the report status changes to processing; users can refresh later and download the PDF when it is ready.", 84, 168, 422, 10, 14, "regular", ...slate, 4);
+
+  drawPanel(doc, 618, 106, 516, 96, "Generation approach");
+  wrapText(doc, "PDF creation runs inside the application without an external AI dependency. A separate PDF pod can be introduced later only if branded HTML rendering, custom fonts or large batch generation becomes necessary.", 646, 168, 422, 10, 14, "regular", ...slate, 4);
+
+  text(doc, `Overall maturity: %${score.overallScore} - ${scoreLabel(score.overallScore)}`, 56, 62, 12, "bold", ...navy);
+  text(doc, `Open recommendation count: ${recommendations.length}`, 888, 62, 12, "bold", ...navy);
 }
 
 function createDoc(): PdfDoc {
@@ -82,187 +169,227 @@ function createDoc(): PdfDoc {
   return { pages: [page], page };
 }
 
-function section(doc: PdfDoc, x: number, y: number, w: number, h: number, title: string) {
-  if (h > 0) {
-    fill(doc, x, y, w, h, 255, 255, 255);
-    strokeRect(doc, x, y, w, h, ...line);
-  }
-  if (title) {
-    fill(doc, x, y + h - 23, Math.min(w, 520), 23, ...navy);
-    text(doc, title, x + 10, y + h - 15, 10, "bold", 255, 255, 255);
-  }
+function addPage(doc: PdfDoc) {
+  const page = { width: pageWidth, height: pageHeight, ops: [] };
+  doc.pages.push(page);
+  doc.page = page;
 }
 
-function drawMaturityList(doc: PdfDoc, categories: CategoryScore[], x: number, top: number, barWidth: number, riskMode = false) {
-  categories.forEach((item, index) => {
-    const y = top - index * 18;
-    const color: RGB = item.score >= 70 ? green : item.score >= 50 ? amber : red;
-    text(doc, compactName(item.category.name), x + 20, y, 7.6, "bold", ...ink);
-    fill(doc, x + 150, y - 4, barWidth * 0.62, 6, 232, 236, 241);
-    fill(doc, x + 150, y - 4, Math.max(3, barWidth * 0.62 * item.score / 100), 6, ...color);
-    text(doc, `%${item.score}`, x + 150 + barWidth * 0.62 + 8, y - 1, 7.4, "bold", ...ink);
-    const mark = riskMode ? "!" : ">";
-    text(doc, mark, x, y - 1, 10, "bold", ...color);
-  });
+function drawShell(doc: PdfDoc, title: string, subtitle: string, pageNumber: number) {
+  fill(doc, 0, 0, pageWidth, pageHeight, 255, 255, 255);
+  fill(doc, 0, 778, pageWidth, 64, ...navy);
+  fill(doc, 0, 774, pageWidth, 4, ...cyan);
+  text(doc, title, 56, 814, 17, "bold", 255, 255, 255);
+  text(doc, subtitle, 56, 792, 10, "regular", 185, 218, 231);
+  text(doc, `Page ${pageNumber}`, 1086, 792, 9, "bold", 185, 218, 231);
+  stroke(doc, 56, 86, 1134, 86, ...softLine);
 }
 
-function drawScoreBadge(doc: PdfDoc, score: number, level: string, x: number, y: number) {
-  circle(doc, x, y, 58, 232, 236, 241);
-  circle(doc, x, y, 46, ...green);
-  circle(doc, x, y, 32, ...navy);
-  text(doc, `%${score}`, x - 24, y + 6, 22, "bold", 255, 255, 255);
-  text(doc, scoreLabel(score), x - 26, y - 13, 9, "bold", 255, 255, 255);
-  text(doc, "Genel DevOps Platform Olgunlugu", x - 92, y + 44, 12, "bold", 255, 255, 255);
-  text(doc, level.replace("Level ", "Seviye "), x - 54, y - 72, 8, "regular", ...ink);
+function drawPanel(doc: PdfDoc, x: number, y: number, w: number, h: number, title: string) {
+  fill(doc, x, y, w, h, ...panel);
+  strokeRect(doc, x, y, w, h, ...line);
+  fill(doc, x, y + h - 34, w, 34, ...wash);
+  stroke(doc, x, y + h - 34, x + w, y + h - 34, ...softLine);
+  text(doc, title, x + 20, y + h - 22, 11, "bold", ...navy);
 }
 
-function drawLegend(doc: PdfDoc, x: number, y: number) {
+function drawKpiCard(doc: PdfDoc, x: number, y: number, w: number, h: number, label: string, value: string, helper: string, color: RGB) {
+  const compact = h < 70;
+  fill(doc, x, y, w, h, 255, 255, 255);
+  strokeRect(doc, x, y, w, h, ...line);
+  fill(doc, x, y, 6, h, ...color);
+  text(doc, label, x + 22, y + h - (compact ? 16 : 24), compact ? 7.5 : 8.5, "bold", ...slate);
+  text(doc, value, x + 22, y + (compact ? 24 : 31), value.length > 8 ? 18 : compact ? 18 : 22, "bold", ...navy);
+  wrapText(doc, helper, x + 22, y + (compact ? 8 : 14), w - 40, 7.4, 9, "regular", ...slate, 2);
+}
+
+function drawScoreDial(doc: PdfDoc, x: number, y: number, radius: number, score: number, label: string) {
+  circle(doc, x, y, radius, 230, 235, 241);
+  circle(doc, x, y, radius - 14, ...scoreColor(score));
+  circle(doc, x, y, radius - 30, ...navy);
+  text(doc, `%${score}`, x - 31, y + 12, 24, "bold", 255, 255, 255);
+  text(doc, label, x - Math.min(42, label.length * 3.2), y - 13, 10, "bold", 210, 232, 240);
+}
+
+function drawMaturityLegend(doc: PdfDoc, x: number, y: number) {
   [
-    ["90-100%", "Mukemmel", green],
-    ["70-89%", "Iyi", [135, 204, 72] as RGB],
-    ["50-69%", "Orta", amber],
-    ["30-49%", "Gelistirilmeli", [245, 120, 32] as RGB],
-    ["0-29%", "Zayif", red]
+    ["90-100", "Excellent", green],
+    ["70-89", "Good", [132, 201, 82] as RGB],
+    ["50-69", "Moderate", amber],
+    ["30-49", "Needs improvement", [237, 110, 42] as RGB],
+    ["0-29", "Weak", red]
   ].forEach(([range, label, color], index) => {
-    const yy = y - index * 22;
+    const yy = y - index * 24;
     circle(doc, x, yy, 6, ...(color as RGB));
-    text(doc, String(range), x + 14, yy - 3, 9, "bold", 255, 255, 255);
-    text(doc, String(label), x + 80, yy - 3, 9, "bold", 255, 255, 255);
+    text(doc, String(range), x + 18, yy - 3, 8.5, "bold", 255, 255, 255);
+    text(doc, String(label), x + 78, yy - 3, 8.5, "regular", 235, 242, 248);
   });
 }
 
-function drawSdlcFlow(doc: PdfDoc, x: number, y: number) {
-  const steps = [
-    ["1. IS TALEBI", "Jira kaydi olusturulur."],
-    ["2. GK & FEATURE", "Kartlar ve branch acilir."],
-    ["3. GELISTIRME & PR", "Kod, PR ve peer review."],
-    ["4. CI & BUILD", "Pipeline calisir, build basarili olur."],
-    ["5. DEPLOYMENT DEV", "Dev ortamina otomatik deploy."],
-    ["6. TEST", "Test ortamina otomatik deploy."],
-    ["7. SECURITY APPROVAL", "Guv. onayi verilir."],
-    ["8. PREP", "Prep ortamina deploy edilir."],
-    ["9. ONAY SURECLERI", "Manager, PCAP ve hazirlik."],
-    ["10. PROD RELEASE", "Release admin onaylar."],
-    ["11. UAT & DONE", "UAT sonrasi DONE olur."]
+function drawProfileGrid(doc: PdfDoc, profile: OrganizationProfile, x: number, y: number) {
+  const items = [
+    ["Sector", profile.sector],
+    ["Applications", `${profile.applicationCount} total / ${profile.productionApplicationCount} prod / ${profile.criticalApplicationCount} critical`],
+    ["Engineering", `${profile.developerCount} developers / ${profile.devopsEngineerCount} DevOps engineers`],
+    ["Cloud", `${profile.cloudProvider} - Kubernetes: ${profile.kubernetesUsage}`],
+    ["Delivery tools", `${profile.sourceControlTool} + ${profile.cicdTool}`],
+    ["Service management", profile.itsmTool],
+    ["Security tools", profile.securityTools || "Not specified"],
+    ["Monitoring", profile.monitoringTools || "Not specified"]
   ];
-  const stepW = 74;
+  items.forEach(([label, value], index) => {
+    const col = index % 4;
+    const row = Math.floor(index / 4);
+    const xx = x + col * 260;
+    const yy = y - row * 50;
+    text(doc, label, xx, yy + 14, 7.5, "bold", ...slate);
+    wrapText(doc, value, xx, yy - 4, 214, 8.8, 11, "bold", ...ink, 2);
+  });
+}
+
+function drawProgressBar(doc: PdfDoc, x: number, y: number, w: number, h: number, score: number, color: RGB) {
+  fill(doc, x, y, w, h, 229, 235, 242);
+  fill(doc, x, y, Math.max(4, w * score / 100), h, ...color);
+}
+
+function drawVerticalScore(doc: PdfDoc, x: number, y: number, h: number, score: number, label: string) {
+  fill(doc, x, y, 48, h, 232, 237, 243);
+  fill(doc, x, y, 48, Math.max(4, h * score / 100), ...scoreColor(score));
+  text(doc, `%${score}`, x + 7, y + h + 18, 12, "bold", ...navy);
+  wrapText(doc, label, x - 22, y - 16, 92, 7.2, 9, "bold", ...slate, 2);
+}
+
+function drawRiskBand(doc: PdfDoc, x: number, y: number, score: number) {
+  const color = scoreColor(score);
+  fill(doc, x, y, 56, 22, ...color);
+  text(doc, `%${score}`, x + 13, y + 7, 9, "bold", 255, 255, 255);
+}
+
+function drawSignalCard(doc: PdfDoc, x: number, y: number, label: string, score: number, helper: string) {
+  fill(doc, x, y, 220, 54, 255, 255, 255);
+  strokeRect(doc, x, y, 220, 54, ...softLine);
+  drawProgressBar(doc, x + 14, y + 13, 62, 8, score, scoreColor(score));
+  text(doc, `%${score}`, x + 88, y + 8, 13, "bold", ...navy);
+  text(doc, label, x + 14, y + 34, 9, "bold", ...ink);
+  wrapText(doc, helper, x + 130, y + 32, 76, 6.8, 8, "regular", ...slate, 2);
+}
+
+function drawTableHeader(doc: PdfDoc, x: number, y: number) {
+  fill(doc, x, y, 1018, 28, ...deepBlue);
+  text(doc, "Priority", x + 14, y + 10, 8.5, "bold", 255, 255, 255);
+  text(doc, "Finding", x + 112, y + 10, 8.5, "bold", 255, 255, 255);
+  text(doc, "Recommended action", x + 466, y + 10, 8.5, "bold", 255, 255, 255);
+  text(doc, "Phase", x + 854, y + 10, 8.5, "bold", 255, 255, 255);
+  text(doc, "Effort", x + 936, y + 10, 8.5, "bold", 255, 255, 255);
+}
+
+function drawRecommendationRow(doc: PdfDoc, item: Recommendation, x: number, y: number, index: number) {
+  fill(doc, x, y, 1018, 38, index % 2 === 0 ? 255 : 248, index % 2 === 0 ? 255 : 250, index % 2 === 0 ? 255 : 253);
+  stroke(doc, x, y, x + 1018, y, ...softLine);
+  drawPill(doc, x + 14, y + 11, 42, 16, item.priority, priorityColor(item.priority));
+  drawPill(doc, x + 62, y + 11, 54, 16, item.severity, severityColor(item.severity));
+  wrapText(doc, item.title, x + 132, y + 24, 294, 8.6, 10, "bold", ...ink, 2);
+  wrapText(doc, item.recommendation, x + 466, y + 24, 336, 8, 10, "regular", ...slate, 2);
+  text(doc, phaseLabel(item.phase), x + 858, y + 15, 8.5, "bold", ...ink);
+  text(doc, item.effort, x + 940, y + 15, 8.5, "bold", ...ink);
+}
+
+function drawPill(doc: PdfDoc, x: number, y: number, w: number, h: number, label: string, color: RGB) {
+  fill(doc, x, y, w, h, ...color);
+  text(doc, label, x + 7, y + 5, 7, "bold", 255, 255, 255);
+}
+
+function drawDeliveryFlow(doc: PdfDoc, x: number, y: number) {
+  const steps = [
+    ["Assessment", "Responses and customer profile are completed"],
+    ["Scoring", "Rule set calculates domain maturity"],
+    ["Interpreting", "Report narrative is prepared"],
+    ["PDF ready", "Executive deck can be downloaded"],
+    ["Backlog", "CSV export can seed Jira issues"]
+  ];
   steps.forEach(([title, body], index) => {
-    const xx = x + index * stepW;
-    stroke(doc, xx + stepW - 8, y - 112, xx + stepW - 8, y + 42, 220, 226, 233);
-    text(doc, title, xx + 2, y + 28, 7.6, "bold", ...(index < 6 ? blue : index < 8 ? amber : index < 10 ? purple : blue));
-    drawIconBox(doc, xx + 24, y - 10, index);
-    wrapText(doc, body, xx + 8, y - 42, 58, 7.2, 9, "bold", ...ink);
+    const xx = x + index * 210;
+    circle(doc, xx + 28, y, 26, ...(index < 2 ? blue : index === 2 ? amber : green));
+    text(doc, String(index + 1), xx + 21, y - 6, 17, "bold", 255, 255, 255);
+    text(doc, title, xx + 66, y + 10, 10.5, "bold", ...ink);
+    wrapText(doc, body, xx + 66, y - 8, 116, 8, 10, "regular", ...slate, 2);
     if (index < steps.length - 1) {
-      stroke(doc, xx + 58, y - 5, xx + 72, y - 5, ...navy);
-      text(doc, ">", xx + 72, y - 8, 8, "bold", ...navy);
+      stroke(doc, xx + 154, y, xx + 194, y, ...line);
+      text(doc, ">", xx + 174, y - 4, 10, "bold", ...slate);
     }
   });
 }
 
-function drawIntegrationStrip(doc: PdfDoc, x: number, y: number) {
-  strokeRect(doc, x - 10, y - 58, 816, 72, ...line);
-  text(doc, "OTOMATIK INTEGRASYON & BILDIRIMLER", x + 270, y + 2, 8, "bold", ...navy);
-  ["Jira Workflow", "Azure DevOps API", "Branch Policy", "Pipeline Olustur", "SonarQube", "Fortify", "Variable Groups", "Environment", "Service Connection", "RBAC", "ITSM / CMDB", "Bildirim"].forEach((label, index) => {
-    const xx = x + index * 66;
-    drawIconBox(doc, xx + 8, y - 28, index);
-    wrapText(doc, label, xx - 2, y - 49, 54, 6.7, 8, "bold", ...ink);
-    if (index < 11) stroke(doc, xx + 42, y - 18, xx + 52, y - 18, ...navy);
-  });
-}
-
-function drawRadarApprox(doc: PdfDoc, categories: CategoryScore[], x: number, y: number, w: number, h: number) {
-  const centerX = x + w / 2;
-  const centerY = y + h / 2;
-  const radius = 60;
-  [1, 0.75, 0.5, 0.25].forEach((scale) => {
-    strokeRect(doc, centerX - radius * scale, centerY - radius * scale, radius * scale * 2, radius * scale * 2, 230, 235, 241);
-  });
-  const key = ["sdlc", "ci", "release", "scm", "observability", "devsecops"];
-  key.forEach((id, index) => {
-    const angle = -Math.PI / 2 + (Math.PI * 2 * index) / key.length;
-    const item = categories.find((category) => category.category.id === id);
-    const value = item?.score ?? 0;
-    const rx = centerX + Math.cos(angle) * radius;
-    const ry = centerY + Math.sin(angle) * radius;
-    const vx = centerX + Math.cos(angle) * radius * value / 100;
-    const vy = centerY + Math.sin(angle) * radius * value / 100;
-    stroke(doc, centerX, centerY, rx, ry, 220, 226, 233);
-    circle(doc, vx, vy, 3, ...green);
-    text(doc, `${compactName(item?.category.name ?? id)} %${value}`, rx - 34, ry - 5, 6.6, "bold", ...ink);
-  });
-  text(doc, "Mevcut Durum", x + 6, y + h - 18, 7, "bold", ...green);
-  text(doc, "Hedef Durum", x + 92, y + h - 18, 7, "bold", ...blue);
-}
-
-function drawSecurityDetail(doc: PdfDoc, items: Array<{ name: string; score: number; notes: string[] }>, x: number, y: number) {
-  items.forEach((item, index) => {
-    const xx = x + index * 68;
-    strokeRect(doc, xx - 4, y - 130, 64, 150, 226, 232, 238);
-    text(doc, item.name, xx + 4, y + 4, 7, "bold", ...ink);
-    circle(doc, xx + 28, y - 36, 22, 232, 236, 241);
-    circle(doc, xx + 28, y - 36, 17, ...(item.score >= 60 ? green : red));
-    circle(doc, xx + 28, y - 36, 12, 255, 255, 255);
-    text(doc, `%${item.score}`, xx + 16, y - 39, 10, "bold", ...ink);
-    item.notes.slice(0, 4).forEach((note, noteIndex) => {
-      text(doc, item.score >= 60 ? "v" : "x", xx, y - 70 - noteIndex * 14, 7, "bold", ...(item.score >= 60 ? green : red));
-      wrapText(doc, note, xx + 9, y - 70 - noteIndex * 14, 48, 5.8, 7, "regular", ...ink);
-    });
-  });
-}
-
-function drawReleaseFlow(doc: PdfDoc, x: number, y: number) {
-  ["Release Admin", "Approval", "Azure DevOps", "Production Deploy", "Validation", "Done"].forEach((label, index) => {
-    const xx = x + index * 61;
-    circle(doc, xx + 16, y, 16, 255, 255, 255);
-    circle(doc, xx + 16, y, 14, ...(index === 1 || index === 5 ? green : blue));
-    circle(doc, xx + 16, y, 11, 255, 255, 255);
-    text(doc, index === 1 || index === 5 ? "v" : String(index + 1), xx + 12, y - 4, 9, "bold", ...(index === 1 || index === 5 ? green : blue));
-    wrapText(doc, label, xx - 2, y - 28, 46, 6.3, 8, "bold", ...ink);
-    if (index < 5) stroke(doc, xx + 32, y, xx + 58, y, ...navy);
-  });
-}
-
-function drawRoadmap(doc: PdfDoc, roadmap: ReturnType<typeof buildRoadmap>, x: number, y: number) {
+function drawRoadmapColumn(doc: PdfDoc, x: number, y: number, w: number, h: number, phase: ReturnType<typeof buildRoadmap>[number], index: number) {
   const colors: RGB[] = [green, amber, purple];
-  roadmap.forEach((phase, index) => {
-    const xx = x + index * 124;
-    fill(doc, xx, y, 112, 22, ...colors[index]);
-    text(doc, `${phase.duration}`, xx + 32, y + 13, 8, "bold", 255, 255, 255);
-    text(doc, phase.title, xx + 14, y + 4, 6.5, "bold", 255, 255, 255);
-    phase.items.slice(0, 3).forEach((item, itemIndex) => {
-      text(doc, "v", xx + 2, y - 14 - itemIndex * 14, 7, "bold", ...colors[index]);
-      wrapText(doc, item.title, xx + 12, y - 14 - itemIndex * 14, 92, 6.2, 8, "regular", ...ink);
-    });
+  fill(doc, x, y, w, h, 255, 255, 255);
+  strokeRect(doc, x, y, w, h, ...softLine);
+  fill(doc, x, y + h - 40, w, 40, ...colors[index]);
+  text(doc, phase.duration, x + 18, y + h - 18, 11, "bold", 255, 255, 255);
+  text(doc, phase.title, x + 118, y + h - 18, 8.5, "bold", 255, 255, 255);
+  const items = phase.items.length > 0 ? phase.items : [{ title: "No critical item assigned to this phase" }];
+  items.slice(0, 5).forEach((item, itemIndex) => {
+    const yy = y + h - 66 - itemIndex * 25;
+    text(doc, "v", x + 18, yy, 8, "bold", ...colors[index]);
+    wrapText(doc, item.title, x + 36, yy + 2, w - 56, 8, 10, "regular", ...ink, 2);
   });
 }
 
-function getSecurityScores(categoryScores: CategoryScore[], recommendations: Recommendation[]) {
-  const devsecops = categoryScores.find((item) => item.category.id === "devsecops")?.score ?? 0;
-  const securityNames = ["SAST", "DAST", "SCA", "Container", "Secret", "IaC", "Runtime"];
-  return securityNames.map((name) => {
-    const match = recommendations.find((item) => item.title.toLowerCase().includes(name.toLowerCase()) || item.id.toLowerCase().includes(name.toLowerCase()));
-    const score = match ? Math.max(5, devsecops - 45) : devsecops;
-    return {
-      name,
-      score,
-      notes: match
-        ? [match.description, match.recommendation, match.expectedImpact]
-        : ["Standart tanimli", "Pipeline veya policy ile izleniyor", "Kanita dayali takip mevcut"]
-    };
-  });
+function drawFooterNote(doc: PdfDoc, note: string) {
+  text(doc, note, 56, 58, 8.5, "regular", ...slate);
+}
+
+function buildExecutiveVerdict(profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[]) {
+  const critical = recommendations.filter((item) => item.severity === "Critical").length;
+  const p1 = recommendations.filter((item) => item.priority === "P1").length;
+  return `${profile.companyName} assessment result indicates ${score.maturityLevel} maturity with an overall score of ${score.overallScore}/100. The report prioritizes ${p1} immediate actions and ${critical} critical risk themes across delivery governance, quality gates, security controls and operational evidence.`;
 }
 
 function buildDeterministicSummary(profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[]) {
   const top = recommendations.slice(0, 3).map((item) => item.title).join(", ");
-  return `${profile.companyName} icin SDLC sureci ${score.maturityLevel} seviyesinde degerlendirildi. En oncelikli iyilestirme alanlari: ${top || "kritik gap bulunmadi"}. Platformun ust olgunluk seviyesine cikmasi icin security gate, release kontrolu, gozlemlenebilirlik ve kanit yonetimi faz bazli uygulanmalidir.`;
+  return `${profile.companyName} is assessed at ${score.maturityLevel} with an overall maturity score of ${score.overallScore}/100. Priority improvement areas are ${top || "not currently critical"}. The recommended operating model is to stabilize evidence, approval and rollback controls first, then expand automated security and quality gates, and finally mature governance reporting.`;
+}
+
+function findScore(categories: CategoryScore[], id: string) {
+  return categories.find((item) => item.category.id === id)?.score ?? 0;
 }
 
 function scoreLabel(score: number) {
-  if (score >= 90) return "MUKEMMEL";
-  if (score >= 70) return "IYI SEVIYE";
-  if (score >= 50) return "ORTA";
-  if (score >= 30) return "GELISTIRILMELI";
-  return "ZAYIF";
+  if (score >= 90) return "EXCELLENT";
+  if (score >= 70) return "GOOD";
+  if (score >= 50) return "MODERATE";
+  if (score >= 30) return "IMPROVE";
+  return "WEAK";
+}
+
+function levelShort(level: string) {
+  return level.replace("Level ", "L");
+}
+
+function phaseLabel(phase: Recommendation["phase"]) {
+  if (phase === "Phase 1") return "0-30d";
+  if (phase === "Phase 2") return "31-90d";
+  return "90d+";
+}
+
+function scoreColor(score: number): RGB {
+  if (score >= 70) return green;
+  if (score >= 50) return amber;
+  if (score >= 30) return [237, 110, 42];
+  return red;
+}
+
+function priorityColor(priority?: Recommendation["priority"]): RGB {
+  if (priority === "P1") return red;
+  if (priority === "P2") return amber;
+  return blue;
+}
+
+function severityColor(severity?: Recommendation["severity"]): RGB {
+  if (severity === "Critical") return red;
+  if (severity === "High") return [237, 110, 42];
+  if (severity === "Medium") return amber;
+  return blue;
 }
 
 function compactName(value: string) {
@@ -272,13 +399,7 @@ function compactName(value: string) {
     .replace("Kaynak Kod", "Kod")
     .replace("İzleme, Log ve Gözlemlenebilirlik", "Observability")
     .replace("DevSecOps ve Güvenlik", "DevSecOps")
-    .replace("Altyapı ve Cloud Hazırlığı", "Altyapi & Cloud");
-}
-
-function drawIconBox(doc: PdfDoc, x: number, y: number, index: number) {
-  const palette: RGB[] = [blue, [32, 156, 86], amber, purple, navy];
-  fill(doc, x, y, 24, 24, ...palette[index % palette.length]);
-  text(doc, index % 3 === 0 ? "<>" : index % 3 === 1 ? "v" : "^", x + 7, y + 8, 12, "bold", 255, 255, 255);
+    .replace("Altyapı ve Cloud Hazırlığı", "Infrastructure & Cloud");
 }
 
 function fill(doc: PdfDoc, x: number, y: number, w: number, h: number, r: number, g: number, b: number) {
@@ -303,22 +424,22 @@ function text(doc: PdfDoc, value: string, x: number, y: number, size: number, we
   doc.page.ops.push(`BT ${rgb(r, g, b)} rg /${font} ${num(size)} Tf ${num(x)} ${num(y)} Td (${pdfText(value)}) Tj ET`);
 }
 
-function wrapText(doc: PdfDoc, value: string, x: number, y: number, width: number, size: number, lineHeight: number, weight: "regular" | "bold", r: number, g: number, b: number) {
+function wrapText(doc: PdfDoc, value: string, x: number, y: number, width: number, size: number, lineHeight: number, weight: "regular" | "bold", r: number, g: number, b: number, maxLines = 5) {
   const words = toPdfSafe(value).split(/\s+/).filter(Boolean);
-  const maxChars = Math.max(8, Math.floor(width / (size * 0.48)));
+  const maxChars = Math.max(8, Math.floor(width / (size * 0.5)));
   const lines: string[] = [];
   let lineText = "";
   words.forEach((word) => {
     const next = lineText ? `${lineText} ${word}` : word;
     if (next.length > maxChars) {
-      lines.push(lineText);
+      if (lineText) lines.push(lineText);
       lineText = word;
     } else {
       lineText = next;
     }
   });
   if (lineText) lines.push(lineText);
-  lines.slice(0, 5).forEach((line, index) => text(doc, line, x, y - index * lineHeight, size, weight, r, g, b));
+  lines.slice(0, maxLines).forEach((line, index) => text(doc, line, x, y - index * lineHeight, size, weight, r, g, b));
 }
 
 function renderPdf(doc: PdfDoc) {
