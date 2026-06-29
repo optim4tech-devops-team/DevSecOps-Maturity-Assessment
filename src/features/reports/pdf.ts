@@ -113,7 +113,10 @@ function drawMaturityPage(doc: PdfDoc, profile: OrganizationProfile, score: Asse
 
   drawPanel(doc, 56, 560, 326, 176, "Score interpretation");
   drawScoreDial(doc, 216, 648, 58, score.overallScore, scoreLabel(score.overallScore));
-  wrapText(doc, `The current platform is assessed at ${score.maturityLevel}. Improvement focus should remain on lower scoring governance, CI quality and security controls until all release-critical controls are measurable.`, 84, 590, 248, 10.8, 15, "regular", ...slate, 5);
+  const maturityNarrative = language === "tr"
+    ? `Platform ${score.maturityLevel} seviyesindedir. Odak, düşük skorlu alanlarda ölçülebilir kanıt ve otomasyonun güçlendirilmesidir.`
+    : `The platform is assessed at ${score.maturityLevel}. Focus should remain on measurable evidence and automation in lower scoring domains.`;
+  wrapText(doc, maturityNarrative, 84, 596, 248, 10.2, 13.5, "regular", ...slate, 4);
 
   drawPanel(doc, 414, 560, 720, 176, "Top maturity domains");
   categories.slice(0, 5).forEach((item, index) => {
@@ -130,19 +133,19 @@ function drawMaturityPage(doc: PdfDoc, profile: OrganizationProfile, score: Asse
   });
 
   drawPanel(doc, 608, 278, 526, 236, "Improvement focus");
-  lowCategories.forEach((item, index) => {
+  lowCategories.slice(0, 5).forEach((item, index) => {
     const y = 450 - index * 38;
     drawRiskBand(doc, 632, y - 2, item.score);
     text(doc, compactName(item.category.name), 710, y + 5, 10.8, "bold", ...ink);
-    wrapText(doc, item.category.description || "Target operating model and evidence maturity should be improved.", 710, y - 11, 338, 8.8, 11, "regular", ...slate, 2);
+    wrapText(doc, item.category.description || "Target operating model and evidence maturity should be improved.", 710, y - 10, 338, 8.2, 9.6, "regular", ...slate, 1);
   });
 
   drawPanel(doc, 56, 106, 1078, 126, "Operating model signal");
   drawGovernanceBand(doc, 84, 168, score);
-  drawSignalCard(doc, 84, 116, "Release control", findScore(categories, "release"), "Approval, rollback and evidence controls");
-  drawSignalCard(doc, 344, 116, "CI quality", findScore(categories, "ci"), "Build, test and quality gate automation");
-  drawSignalCard(doc, 604, 116, "Security posture", findScore(categories, "devsecops"), "SAST, SCA, DAST, secret and runtime controls");
-  drawSignalCard(doc, 864, 116, "Observability", findScore(categories, "observability"), "Monitoring, logging, SLO and incident visibility");
+  drawSignalCard(doc, 84, 112, "Release control", findScore(categories, "release"), "Approval, rollback and evidence controls");
+  drawSignalCard(doc, 344, 112, "CI quality", findScore(categories, "ci"), "Build, test and quality gate automation");
+  drawSignalCard(doc, 604, 112, "Security posture", findScore(categories, "devsecops"), "SAST, SCA, DAST, secret and runtime controls");
+  drawSignalCard(doc, 864, 112, "Observability", findScore(categories, "observability"), "Monitoring, logging, SLO and incident visibility");
 }
 
 function drawRecommendationsPage(doc: PdfDoc, profile: OrganizationProfile, score: AssessmentScore, recommendations: Recommendation[], language: ReportLanguage) {
@@ -213,12 +216,12 @@ function drawCompliancePage(doc: PdfDoc, profile: OrganizationProfile, complianc
     const y = 458 - index * 44;
     fill(doc, 84, y, 1022, 40, index % 2 === 0 ? 255 : 248, index % 2 === 0 ? 255 : 250, index % 2 === 0 ? 255 : 253);
     stroke(doc, 84, y, 1106, y, ...softLine);
-    wrapText(doc, `${control.source}\n${control.article}`, 98, y + 26, 92, 8, 10, "bold", ...ink, 2);
-    wrapText(doc, `${control.title}. ${control.summary}`, 220, y + 27, 362, 8.5, 10, "regular", ...ink, 3);
+    wrapText(doc, `${control.source}\n${control.article}`, 98, y + 26, 92, 7.8, 9.4, "bold", ...ink, 2);
+    wrapText(doc, control.title, 220, y + 27, 362, 8.3, 9.8, "regular", ...ink, 2);
     drawPill(doc, 630, y + 13, 76, 16, control.status, statusColor(control.status));
     text(doc, `${control.score}/100`, 630, y + 5, 8, "bold", ...slate);
     const evidence = control.gaps.length > 0 ? `Açık sinyal: ${control.gaps.join(", ")}` : `Kanıt: ${control.evidence.slice(0, 2).join(", ")}`;
-    wrapText(doc, evidence, 740, y + 27, 318, 8.2, 10, "regular", ...slate, 3);
+    wrapText(doc, evidence, 740, y + 27, 318, 8, 9.6, "regular", ...slate, 2);
   });
 
   drawFooterNote(doc, "BDDK section is generated from assessment answers; legal and audit teams should validate final regulatory interpretation.");
@@ -619,7 +622,13 @@ function wrapText(doc: PdfDoc, value: string, x: number, y: number, width: numbe
     }
   });
   if (lineText) lines.push(lineText);
-  lines.slice(0, maxLines).forEach((line, index) => text(doc, line, x, y - index * lineHeight, size, weight, r, g, b));
+  const visibleLines = lines.slice(0, maxLines);
+  if (lines.length > maxLines && visibleLines.length > 0) {
+    const lastIndex = visibleLines.length - 1;
+    const last = visibleLines[lastIndex];
+    visibleLines[lastIndex] = last.length > 3 ? `${last.slice(0, Math.max(1, maxChars - 3)).trim()}...` : last;
+  }
+  visibleLines.forEach((line, index) => text(doc, line, x, y - index * lineHeight, size, weight, r, g, b));
 }
 
 function renderPdf(doc: PdfDoc) {

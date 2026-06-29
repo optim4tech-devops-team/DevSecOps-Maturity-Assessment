@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Activity, BarChart3, Clipboard, Clock3, Download, FileDown, FileText, RefreshCcw, ShieldCheck, Sparkles } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, Clipboard, Clock3, Download, FileDown, FileText, RefreshCcw, Route, ShieldCheck, Sparkles } from "lucide-react";
 import { AssessmentEditor } from "@/components/AssessmentEditor";
 import { AssessmentRecord } from "@/lib/types";
 import { calculateAssessment } from "@/features/scoring/scoring";
-import { generateRecommendations } from "@/features/recommendations/recommendations";
+import { buildRoadmap, generateRecommendations } from "@/features/recommendations/recommendations";
 import { CategoryBars, ScoreDonut } from "@/components/Charts";
 import { DeliveryFlow } from "@/components/DeliveryFlow";
 
-type CustomerPortalView = "assessment" | "results" | "summary" | "reports";
+type CustomerPortalView = "assessment" | "results" | "recommendations" | "roadmap" | "summary" | "reports";
 
 const portalTabs: Array<{ id: CustomerPortalView; label: string; icon: typeof Clipboard }> = [
   { id: "assessment", label: "Assessment", icon: Clipboard },
   { id: "results", label: "Results", icon: BarChart3 },
+  { id: "recommendations", label: "Recommendations", icon: AlertTriangle },
+  { id: "roadmap", label: "Roadmap", icon: Route },
   { id: "summary", label: "Summary", icon: Sparkles },
   { id: "reports", label: "Reports", icon: FileText }
 ];
@@ -60,6 +62,7 @@ export default function PublicAssessmentPage({ params }: { params: Promise<{ tok
 
   const score = record.score ?? calculateAssessment(record.answers);
   const recommendations = record.recommendations ?? generateRecommendations(record.answers, score.categoryScores);
+  const roadmap = buildRoadmap(recommendations);
   const reportReady = record.reportStatus === "Ready";
   const reportProcessing = record.reportStatus === "Processing";
 
@@ -143,6 +146,14 @@ export default function PublicAssessmentPage({ params }: { params: Promise<{ tok
           </div>
         ) : null}
 
+        {activeView === "recommendations" ? (
+          <CustomerRecommendations recommendations={recommendations} />
+        ) : null}
+
+        {activeView === "roadmap" ? (
+          <CustomerRoadmap roadmap={roadmap} />
+        ) : null}
+
         {activeView === "summary" ? (
           <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_340px]">
             <div className="panel p-4">
@@ -151,7 +162,7 @@ export default function PublicAssessmentPage({ params }: { params: Promise<{ tok
                 {record.aiSummary ?? (reportProcessing ? "Yorumlanıyor. Rapor hazır olduğunda bu alanda özet görüntülenecek." : "Assessment tamamlandıktan sonra summary ve PDF hazırlama süreci başlar.")}
               </div>
             </div>
-            <CustomerSidePanel record={record} score={score} recommendations={recommendations.length} />
+            <CustomerPdfPanel record={record} reportReady={reportReady} reportProcessing={reportProcessing} />
           </div>
         ) : null}
 
@@ -201,19 +212,67 @@ function SideMetric({ label, value }: { label: string; value: string }) {
   );
 }
 
+function CustomerRecommendations({ recommendations }: { recommendations: ReturnType<typeof generateRecommendations> }) {
+  return (
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+      {recommendations.length > 0 ? recommendations.map((item) => (
+        <div key={item.id} className="panel p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className={`rounded px-2 py-1 text-xs font-semibold ${item.priority === "P1" ? "bg-red-50 text-danger" : "bg-amber/10 text-amber"}`}>{item.priority}</span>
+              <span className="rounded bg-wash px-2 py-1 text-xs font-semibold text-muted">{item.severity}</span>
+            </div>
+            <span className="text-xs font-semibold text-muted">{item.phase}</span>
+          </div>
+          <h2 className="text-sm font-semibold leading-5 text-ink">{item.title}</h2>
+          <p className="mt-2 text-xs leading-5 text-muted">{item.recommendation}</p>
+          <div className="mt-4 rounded-md border border-[#d8e5ee] bg-[#f7fafc] px-3 py-2 text-xs font-semibold text-ink">Effort: {item.effort}</div>
+        </div>
+      )) : (
+        <div className="panel p-4 text-sm text-muted">Öncelikli aksiyon bulunmuyor.</div>
+      )}
+    </div>
+  );
+}
+
+function CustomerRoadmap({ roadmap }: { roadmap: ReturnType<typeof buildRoadmap> }) {
+  return (
+    <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+      {roadmap.map((phase) => (
+        <div key={phase.phase} className="panel p-4">
+          <div className="mb-4">
+            <div className="text-xs font-semibold text-muted">{phase.duration}</div>
+            <h2 className="mt-1 text-sm font-semibold text-ink">{phase.phase}: {phase.title}</h2>
+          </div>
+          <div className="space-y-3">
+            {phase.items.length > 0 ? phase.items.map((item) => (
+              <div key={item.id} className="rounded-md border border-[#d8e5ee] bg-white p-3">
+                <div className="text-sm font-semibold text-ink">{item.title}</div>
+                <p className="mt-1 text-xs leading-5 text-muted">{item.recommendation}</p>
+              </div>
+            )) : <div className="rounded-md border border-dashed border-[#d8e5ee] p-3 text-sm text-muted">Bu faz için otomatik aksiyon oluşmadı.</div>}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function CustomerReports({ record, reportReady, reportProcessing, onRefresh }: { record: AssessmentRecord; reportReady: boolean; reportProcessing: boolean; onRefresh: () => Promise<void> }) {
   const readyAt = record.reportReadyAt ? new Date(record.reportReadyAt).toLocaleString("tr-TR") : "";
   return (
-    <div className="panel p-4">
-      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <h2 className="text-sm font-semibold">Reports</h2>
-          <p className="mt-1 text-xs leading-5 text-muted">Tüm rapor çıktıları bu token üzerinden erişilebilir. PDF hazır değilse durum bilgisi gösterilir.</p>
+    <div className="space-y-4">
+      <div className="panel p-4">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div>
+            <h2 className="text-sm font-semibold">Reports</h2>
+            <p className="mt-1 text-xs leading-5 text-muted">Platform içindeki rapor çıktıları müşteri token ekranında da aynı kapsamla erişilebilir. Türkçe ve İngilizce çıktılar ayrı linklerden indirilebilir.</p>
+          </div>
+          <button onClick={() => void onRefresh()} className="focus-ring flex w-fit items-center gap-2 rounded-md border border-[#cbd9e4] bg-white px-3 py-2 text-xs font-semibold text-ink"><RefreshCcw size={14} /> Durumu kontrol et</button>
         </div>
-        <button onClick={() => void onRefresh()} className="focus-ring flex w-fit items-center gap-2 rounded-md border border-[#cbd9e4] bg-white px-3 py-2 text-xs font-semibold text-ink"><RefreshCcw size={14} /> Durumu kontrol et</button>
       </div>
       {reportProcessing ? (
-        <div className="mb-4 rounded-md border border-amber/30 bg-amber/10 p-4">
+        <div className="rounded-md border border-amber/30 bg-amber/10 p-4">
           <div className="flex items-center gap-3">
             <span className="h-3 w-3 animate-pulse rounded-full bg-amber" />
             <div>
@@ -223,17 +282,51 @@ function CustomerReports({ record, reportReady, reportProcessing, onRefresh }: {
           </div>
         </div>
       ) : null}
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-        <CustomerReportAction icon={FileText} title="HTML result - Türkçe" description="Canlı rapor önizlemesi" href={`/api/export/${record.token}/html?lang=tr`} />
-        <CustomerReportAction icon={FileText} title="HTML result - English" description="English live report preview" href={`/api/export/${record.token}/html?lang=en`} />
-        <CustomerReportAction icon={Activity} title="JSON result - Türkçe" description="Skor, cevap ve öneri verisi" href={`/api/export/${record.token}/json?lang=tr`} />
-        <CustomerReportAction icon={Activity} title="JSON result - English" description="Score, answers and recommendations data" href={`/api/export/${record.token}/json?lang=en`} />
-        <CustomerReportAction icon={FileDown} title="Markdown result - Türkçe" description="Metin formatında rapor çıktısı" href={`/api/export/${record.token}/markdown?lang=tr`} />
-        <CustomerReportAction icon={FileDown} title="Markdown result - English" description="Editable English report output" href={`/api/export/${record.token}/markdown?lang=en`} />
-        <CustomerReportAction icon={Download} title="PDF result - Türkçe" description={reportReady ? "Türkçe executive PDF hazır" : reportProcessing ? "Yorumlanıyor, lütfen daha sonra yenileyin" : "Assessment tamamlandıktan sonra hazırlanır"} href={reportReady ? `/api/export/${record.token}/pdf?lang=tr` : undefined} disabled={!reportReady} busy={reportProcessing} />
-        <CustomerReportAction icon={Download} title="PDF result - English" description={reportReady ? "English executive PDF is ready" : reportProcessing ? "Processing, please refresh later" : "Available after assessment completion"} href={reportReady ? `/api/export/${record.token}/pdf?lang=en` : undefined} disabled={!reportReady} busy={reportProcessing} />
-        <CustomerReportAction icon={Clipboard} title="Jira issue export" description="Önerileri Jira import CSV olarak indir" href={`/api/export/${record.token}/jira`} />
-        <CustomerReportAction icon={Clock3} title="Report status" description={record.reportGeneratedAt ? new Date(record.reportGeneratedAt).toLocaleString("tr-TR") : readyAt || "Henüz hazır değil"} />
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[340px_minmax(0,1fr)]">
+        <CustomerPdfPanel record={record} reportReady={reportReady} reportProcessing={reportProcessing} />
+        <div className="panel p-4">
+          <h3 className="mb-3 text-sm font-semibold">Data & working exports</h3>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <CustomerReportAction icon={FileText} title="HTML result - Türkçe" description="Canlı rapor önizlemesi" href={`/api/export/${record.token}/html?lang=tr`} />
+            <CustomerReportAction icon={FileText} title="HTML result - English" description="English live report preview" href={`/api/export/${record.token}/html?lang=en`} />
+            <CustomerReportAction icon={Activity} title="JSON result - Türkçe" description="Skor, cevap ve öneri verisi" href={`/api/export/${record.token}/json?lang=tr`} />
+            <CustomerReportAction icon={Activity} title="JSON result - English" description="Score, answers and recommendations data" href={`/api/export/${record.token}/json?lang=en`} />
+            <CustomerReportAction icon={FileDown} title="Markdown result - Türkçe" description="Metin formatında rapor çıktısı" href={`/api/export/${record.token}/markdown?lang=tr`} />
+            <CustomerReportAction icon={FileDown} title="Markdown result - English" description="Editable English report output" href={`/api/export/${record.token}/markdown?lang=en`} />
+            <CustomerReportAction icon={Clipboard} title="Jira issue export" description="Önerileri Jira import CSV olarak indir" href={`/api/export/${record.token}/jira`} />
+            <CustomerReportAction icon={Clock3} title="Report status" description={record.reportGeneratedAt ? new Date(record.reportGeneratedAt).toLocaleString("tr-TR") : readyAt || "Henüz hazır değil"} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CustomerPdfPanel({ record, reportReady, reportProcessing }: { record: AssessmentRecord; reportReady: boolean; reportProcessing: boolean }) {
+  const readyAt = record.reportReadyAt ? new Date(record.reportReadyAt).toLocaleString("tr-TR") : "";
+  return (
+    <div className="panel p-4">
+      <h3 className="text-sm font-semibold">Executive PDF</h3>
+      <p className="mt-1 text-xs leading-5 text-muted">Aynı assessment verisinden Türkçe ve İngilizce PDF çıktıları üretilir.</p>
+      <div className="mt-4 flex items-center gap-3 rounded-md border border-[#d8e5ee] bg-[#f7fafc] p-3">
+        <Clock3 className={reportReady ? "text-teal" : "text-amber"} size={18} />
+        <div>
+          <div className="text-sm font-semibold">{reportReady ? "PDF hazır" : reportProcessing ? "PDF hazırlanıyor" : "Henüz başlamadı"}</div>
+          <div className="text-xs text-muted">{record.reportGeneratedAt ? new Date(record.reportGeneratedAt).toLocaleString("tr-TR") : readyAt || "Complete sonrası planlanır"}</div>
+        </div>
+      </div>
+      <div className="mt-4 grid grid-cols-1 gap-2">
+        {reportReady ? (
+          <>
+            <a href={`/api/export/${record.token}/pdf?lang=tr`} className="focus-ring flex w-full items-center justify-center gap-2 rounded-md bg-ink px-3 py-2 text-sm font-semibold text-white"><Download size={16} /> Türkçe PDF indir</a>
+            <a href={`/api/export/${record.token}/pdf?lang=en`} className="focus-ring flex w-full items-center justify-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink"><Download size={16} /> English PDF download</a>
+          </>
+        ) : (
+          <button disabled className="flex w-full cursor-not-allowed items-center justify-center gap-2 rounded-md border border-line bg-wash px-3 py-2 text-sm font-semibold text-muted">
+            {reportProcessing ? <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-amber" /> : null}
+            {reportProcessing ? "Yorumlanıyor" : "PDF hazır değil"}
+          </button>
+        )}
       </div>
     </div>
   );
