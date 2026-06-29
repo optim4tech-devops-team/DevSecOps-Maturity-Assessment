@@ -653,7 +653,8 @@ function ReportsView({ record, reportReady, reportProcessing, onRefresh }: { rec
           <ReportAction icon={FileDown} title="Markdown export - English" description="Editable English text export" href={`/api/export/${record.token}/markdown?lang=en`} />
           <ReportAction icon={Activity} title="JSON export - Türkçe" description="Skor, cevap ve öneri verisi" href={`/api/export/${record.token}/json?lang=tr`} />
           <ReportAction icon={Activity} title="JSON export - English" description="Score, answers and recommendations data" href={`/api/export/${record.token}/json?lang=en`} />
-          <ReportAction icon={Clipboard} title="Jira issue export" description="Önerileri Jira import CSV formatında indir" href={`/api/export/${record.token}/jira`} />
+          <ReportAction icon={Clipboard} title="Jira issue export - Türkçe" description="Önerileri Türkçe Jira import CSV formatında indir" href={`/api/export/${record.token}/jira?lang=tr`} />
+          <ReportAction icon={Clipboard} title="Jira issue export - English" description="Download English Jira import CSV for actions" href={`/api/export/${record.token}/jira?lang=en`} />
           <ReportAction icon={Download} title="Executive PDF - Türkçe" description={reportReady ? "Türkçe PDF hazır" : reportProcessing ? "Yorumlanıyor, lütfen daha sonra tekrar kontrol edin" : "Assessment tamamlandıktan sonra hazırlanır"} href={reportReady ? `/api/export/${record.token}/pdf?lang=tr` : undefined} disabled={!reportReady} busy={reportProcessing} />
           <ReportAction icon={Download} title="Executive PDF - English" description={reportReady ? "English PDF is ready" : reportProcessing ? "Processing, please refresh later" : "Available after assessment completion"} href={reportReady ? `/api/export/${record.token}/pdf?lang=en` : undefined} disabled={!reportReady} busy={reportProcessing} />
         </div>

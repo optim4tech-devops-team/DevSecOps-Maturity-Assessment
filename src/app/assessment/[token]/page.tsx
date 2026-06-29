@@ -293,7 +293,8 @@ function CustomerReports({ record, reportReady, reportProcessing, onRefresh }: {
             <CustomerReportAction icon={Activity} title="JSON result - English" description="Score, answers and recommendations data" href={`/api/export/${record.token}/json?lang=en`} />
             <CustomerReportAction icon={FileDown} title="Markdown result - Türkçe" description="Metin formatında rapor çıktısı" href={`/api/export/${record.token}/markdown?lang=tr`} />
             <CustomerReportAction icon={FileDown} title="Markdown result - English" description="Editable English report output" href={`/api/export/${record.token}/markdown?lang=en`} />
-            <CustomerReportAction icon={Clipboard} title="Jira issue export" description="Önerileri Jira import CSV olarak indir" href={`/api/export/${record.token}/jira`} />
+            <CustomerReportAction icon={Clipboard} title="Jira issue export - Türkçe" description="Önerileri Türkçe Jira import CSV olarak indir" href={`/api/export/${record.token}/jira?lang=tr`} />
+            <CustomerReportAction icon={Clipboard} title="Jira issue export - English" description="Download English Jira import CSV for actions" href={`/api/export/${record.token}/jira?lang=en`} />
             <CustomerReportAction icon={Clock3} title="Report status" description={record.reportGeneratedAt ? new Date(record.reportGeneratedAt).toLocaleString("tr-TR") : readyAt || "Henüz hazır değil"} />
           </div>
         </div>

@@ -852,6 +852,87 @@
       ]
     },
     {
+      "id": "infra_iac_tools",
+      "code": "INF-IAC-TOOL-001",
+      "categoryId": "infrastructure",
+      "text": "Infrastructure as Code, konfigürasyon yönetimi ve platform kurulumlarında hangi tool zinciri aktif kullanılmaktadır?",
+      "type": "tool",
+      "weight": 3,
+      "required": true,
+      "options": [
+        {
+          "label": "Kullanılmıyor",
+          "value": "none",
+          "score": 0
+        },
+        {
+          "label": "Terraform",
+          "value": "terraform",
+          "score": 4
+        },
+        {
+          "label": "OpenTofu",
+          "value": "opentofu",
+          "score": 4
+        },
+        {
+          "label": "Ansible",
+          "value": "ansible",
+          "score": 4
+        },
+        {
+          "label": "Pulumi",
+          "value": "pulumi",
+          "score": 4
+        },
+        {
+          "label": "Crossplane",
+          "value": "crossplane",
+          "score": 4
+        },
+        {
+          "label": "Helm",
+          "value": "helm",
+          "score": 3
+        },
+        {
+          "label": "Kustomize",
+          "value": "kustomize",
+          "score": 3
+        },
+        {
+          "label": "Argo CD / GitOps",
+          "value": "argo_gitops",
+          "score": 4
+        },
+        {
+          "label": "Azure Bicep / ARM",
+          "value": "azure_bicep_arm",
+          "score": 3
+        },
+        {
+          "label": "AWS CloudFormation / CDK",
+          "value": "aws_cfn_cdk",
+          "score": 3
+        },
+        {
+          "label": "Red Hat Advanced Cluster Management",
+          "value": "rhacm",
+          "score": 4
+        },
+        {
+          "label": "VMware Aria Automation",
+          "value": "vmware_aria",
+          "score": 3
+        },
+        {
+          "label": "Diğer",
+          "value": "other",
+          "score": 2
+        }
+      ]
+    },
+    {
       "id": "k8s_container_standard",
       "code": "K8S-CONTAINER-001",
       "categoryId": "k8s",

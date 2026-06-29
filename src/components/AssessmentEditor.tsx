@@ -420,20 +420,32 @@ function QuestionInput({ questionId, answers, setAnswers, compact }: { questionI
           })}
         </div>
       ) : (
-        <select className="focus-ring w-full rounded-md border border-line bg-white px-3 py-2 text-sm" value={String(value ?? "")} onChange={(event) => setAnswers({ ...answers, [question.id]: event.target.value })}>
-          <option value="">Seçiniz</option>
-          {question.options?.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-        </select>
+        <div className={`grid gap-2 ${compact ? "grid-cols-1" : "grid-cols-1 xl:grid-cols-2"}`}>
+          {question.options?.map((option) => {
+            const selected = String(value ?? "") === option.value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setAnswers({ ...answers, [question.id]: option.value })}
+                className={`focus-ring min-h-[52px] rounded-md border px-3 py-2 text-left text-xs font-medium leading-4 transition ${selected ? "border-teal bg-teal text-white shadow-[0_8px_18px_rgba(15,159,143,0.14)]" : "border-line bg-[#fbfdff] text-ink hover:border-[#9bb1c2]"}`}
+              >
+                <span className="block">{option.label}</span>
+                <span className={`mt-1 inline-flex rounded px-1.5 py-0.5 text-[10px] font-semibold ${selected ? "bg-white/16 text-white" : "bg-wash text-muted"}`}>Skor {option.score}/5</span>
+              </button>
+            );
+          })}
+        </div>
       )}
-      <label className="mt-3 block text-xs font-semibold text-muted">
-        Assessment note / evidence hint
+      <details className="mt-3 rounded-md border border-dashed border-line bg-[#fbfdff] px-3 py-2">
+        <summary className="cursor-pointer text-xs font-semibold text-muted">Opsiyonel kanıt / görüşme notu</summary>
         <textarea
-          className="focus-ring mt-1 min-h-[68px] w-full resize-y rounded-md border border-line px-3 py-2 text-sm text-ink"
-          placeholder="Görüşme notu, kanıt linki, tool kapsamı veya istisna bilgisi..."
+          className="focus-ring mt-2 min-h-[68px] w-full resize-y rounded-md border border-line px-3 py-2 text-sm text-ink"
+          placeholder="Kanıt linki, tool kapsamı, istisna veya kısa görüşme notu..."
           value={note}
           onChange={(event) => setAnswers({ ...answers, [noteKey]: event.target.value })}
         />
-      </label>
+      </details>
     </div>
   );
 }
